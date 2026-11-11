@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Vaztoodix RE Studio — Zones Rouge & Violette</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body {
+  height: 100%;
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: radial-gradient(circle at top left, #0a0a0f, #050508 60%, #020204);
+  color: #e8e8f0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.gold-text {
+  background: linear-gradient(135deg, #ffd700 0%, #ffb300 25%, #fff8b0 50%, #ffb300 75%, #b8860b 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: bold;
+}
+
+/* ===== VOILES ANIMÉS (Zones Rouge / Violette) ===== */
+.zone-veil {
+  position: fixed;
+  top: 0;
+  width: 55vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0;
+  transition: opacity 0.6s ease, transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+.zone-veil.red {
+  left: 0;
+  background: radial-gradient(ellipse at top left, rgba(255, 40, 40, 0.45) 0%, rgba(180, 0, 0, 0.18) 35%, transparent 70%);
+  transform: translateX(-100%) skewX(-8deg);
+}
+.zone-veil.purple {
+  right: 0;
+  background: radial-gradient(ellipse at top right, rgba(189, 147, 249, 0.45) 0%, rgba(98, 114, 164, 0.18) 35%, transparent 70%);
+  transform: translateX(100%) skewX(8deg);
+}
+.zone-veil.active {
+  opacity: 1;
+  transform: translateX(0) skewX(0);
+}
+
+/* ===== OVERLAY DE BALAYAGE (transition flash) ===== */
+.sweep-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 999;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.sweep-overlay.fire {
+  animation: sweepFire 0.75s cubic-bezier(0.7, 0, 0.3, 1) forwards;
+}
+.sweep-overlay.fire.from-left {
+  background: linear-gradient(90deg, rgba(255, 50, 50, 0.85) 0%, rgba(255, 50, 50, 0.35) 45%, transparent 100%);
+}
+.sweep-overlay.fire.from-right {
+  background: linear-gradient(270deg, rgba(189, 147, 249, 0.85) 0%, rgba(189, 147, 249, 0.35) 45%, transparent 100%);
+}
+@keyframes sweepFire {
+  0%   { opacity: 0; transform: translateX(0); }
+  15%  { opacity: 1; }
+  100% { opacity: 0; transform: translateX(0); }
+}
+
+/* ===== HEADER ===== */
+.app-header {
+  height: 52px;
+  background: rgba(15, 15, 25, 0.85);
+  border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+  z-index: 100;
+  flex-shrink: 0;
+  position: relative;
+}
+.logo-area { display: flex; align-items: center; gap: 10px; }
+.logo {
+  width: 36px; height: 36px;
+  background: radial-gradient(circle, #ffd700, #b8860b);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: bold; font-size: 11px; color: #1a1a1a;
+}
+.app-title h1 { font-size: 14px; }
+.app-title .version { font-size: 10px; color: #888; }
+.header-actions { display: flex; gap: 6px; }
+.icon-btn {
+  width: 32px; height: 32px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  border-radius: 8px;
+  color: #e8e8f0;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+}
+.icon-btn:active { background: rgba(255, 215, 0, 0.15); }
+
+/* ===== MAIN LAYOUT ===== */
+.app-main {
+  flex: 1;
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  overflow: hidden;
+  min-height: 0;
+  z-index: 10;
+  position: relative;
+}
+.sidebar {
+  width: 52px;
+  background: rgba(15, 15, 25, 0.7);
+  border: 1px solid rgba(255, 215, 0, 0.15);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 0;
+  gap: 6px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  backdrop-filter: blur(8px);
+}
+.nav-btn {
+  width: 38px; height: 38px;
+  background: rgba(40, 40, 60, 0.6);
+  border: 1px solid rgba(255, 215, 0, 0.1);
+  border-radius: 9px;
+  font-size: 16px;
+  cursor: pointer;
+  color: #e8e8f0;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+  transition: transform 0.2s, background 0.3s, border-color 0.3s;
+}
+.nav-btn:active { transform: scale(0.92); }
+.nav-btn.active {
+  background: linear-gradient(135deg, #ffd700, #b8860b);
+  color: #1a1a1a;
+  border-color: #fff8b0;
+}
+.nav-btn[data-cat="zone-red"].active {
+  background: linear-gradient(135deg, #ff5555, #aa0000);
+  color: #fff;
+  border-color: #ff9999;
+  box-shadow: 0 0 12px rgba(255, 60, 60, 0.6);
+}
+.nav-btn[data-cat="zone-purple"].active {
+  background: linear-gradient(135deg, #bd93f9, #6272a4);
+  color: #fff;
+  border-color: #d7b3ff;
+  box-shadow: 0 0 12px rgba(189, 147, 249, 0.6);
+}
+
+.center-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  min-height: 0;
+}
+.panel-header {
+  background: rgba(15, 15, 25, 0.7);
+  border: 1px solid rgba(255, 215, 0, 0.15);
+  border-radius: 12px;
+  padding: 10px 14px;
+  flex-shrink: 0;
+  backdrop-filter: blur(8px);
+  transition: border-color 0.5s;
+}
+.panel-header.zone-red-theme { border-color: rgba(255, 60, 60, 0.5); box-shadow: 0 0 20px rgba(255, 60, 60, 0.15); }
+.panel-header.zone-purple-theme { border-color: rgba(189, 147, 249, 0.5); box-shadow: 0 0 20px rgba(189, 147, 249, 0.15); }
+.panel-header h2 { font-size: 15px; margin-bottom: 2px; }
+.panel-header p { font-size: 11px; color: #999; }
+.search-input {
+  width: 100%; height: 26px;
+  margin-top: 8px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  border-radius: 7px;
+  padding: 0 10px;
+  color: #e8e8f0;
+  font-size: 12px;
+  outline: none;
+}
+.panel-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 4px;
+  border-radius: 12px;
+  min-height: 0;
+  -webkit-overflow-scrolling: touch;
+}
+.panel-content::-webkit-scrollbar { width: 6px; }
+.panel-content::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #ffd700, #b8860b); border-radius: 3px; }
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+  padding-bottom: 20px;
+}
+.card {
+  background: rgba(25, 25, 40, 0.8);
+  border: 1px solid rgba(255, 215, 0, 0.15);
+  border-radius: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s, border-color 0.3s, box-shadow 0.3s;
+  min-height: 90px;
+  display: block;
+  user-select: none;
+  backdrop-filter: blur(4px);
+}
+.card:active {
+  background: rgba(35, 35, 55, 0.9);
+  border-color: rgba(255, 215, 0, 0.4);
+  transform: scale(0.98);
+}
+/* Cartes thémées */
+.card.card-red { border-color: rgba(255, 60, 60, 0.35); }
+.card.card-red:active { border-color: rgba(255, 90, 90, 0.8); box-shadow: 0 0 14px rgba(255, 60, 60, 0.35); }
+.card.card-purple { border-color: rgba(189, 147, 249, 0.35); }
+.card.card-purple:active { border-color: rgba(200, 160, 255, 0.85); box-shadow: 0 0 14px rgba(189, 147, 249, 0.35); }
+
+.card-title {
+  font-size: 13px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.card-desc {
+  font-size: 11px;
+  color: #a0a0b0;
+  line-height: 1.5;
+}
+.right-panel {
+  width: 42%;
+  min-width: 320px;
+  background: rgba(15, 15, 25, 0.75);
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  min-height: 0;
+  -webkit-overflow-scrolling: touch;
+  backdrop-filter: blur(8px);
+  transition: border-color 0.5s, box-shadow 0.5s;
+}
+.right-panel.zone-red-theme { border-color: rgba(255, 60, 60, 0.5); box-shadow: 0 0 20px rgba(255, 60, 60, 0.15); }
+.right-panel.zone-purple-theme { border-color: rgba(189, 147, 249, 0.5); box-shadow: 0 0 20px rgba(189, 147, 249, 0.15); }
+.right-panel.collapsed { width: 48px; min-width: 48px; padding: 6px 4px; }
+.right-panel.collapsed .detail-content { display: none; }
+.right-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+.detail-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  min-height: 0;
+}
+.detail-title { font-size: 16px; margin-bottom: 4px; }
+.detail-desc {
+  font-size: 12px;
+  color: #b0b0c0;
+  line-height: 1.6;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  border-left: 3px solid #ffd700;
+}
+.detail-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 11px; }
+.meta-tag {
+  background: rgba(255, 215, 0, 0.1);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 6px;
+  padding: 4px 10px;
+  color: #ffd700;
+}
+.tutorial-content {
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 11px;
+  line-height: 1.7;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+  padding: 12px;
+  border: 1px solid rgba(255, 215, 0, 0.15);
+  white-space: pre-wrap;
+  color: #c0c0d0;
+  overflow-x: auto;
+}
+.tutorial-content .cmd { color: #50dc78; font-weight: bold; }
+.tutorial-content .comment { color: #6a6a80; font-style: italic; }
+.tutorial-content .keyword { color: #ffd700; font-weight: bold; }
+.wiki-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 11px;
+  line-height: 1.6;
+  color: #c0c0d0;
+}
+.wiki-box .wiki-title { font-size: 12px; font-weight: bold; margin-bottom: 6px; color: #ffd700; }
+.wiki-box .wiki-loading { color: #888; font-style: italic; }
+.wiki-box a { color: #ffd700; text-decoration: underline; word-break: break-all; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 900px) {
+  .app-main { flex-direction: column; padding: 4px; }
+  .sidebar { width: 100%; height: 50px; flex-direction: row; padding: 6px; overflow-x: auto; }
+  .nav-btn { width: 36px; height: 36px; }
+  .right-panel { width: 100%; min-width: unset; height: 45vh; }
+  .right-panel.collapsed { height: 48px; width: 100%; min-width: unset; }
+  .cards-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .zone-veil { width: 80vw; }
+}
+@media (max-width: 500px) {
+  .cards-grid { grid-template-columns: 1fr; }
+  .app-title h1 { font-size: 12px; }
+  .logo { width: 32px; height: 32px; font-size: 10px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Voiles animés persistants (haut-gauche rouge / haut-droit violet) -->
+<div class="zone-veil red" id="veilRed"></div>
+<div class="zone-veil purple" id="veilPurple"></div>
+<!-- Overlay de balayage pour la transition -->
+<div class="sweep-overlay" id="sweepOverlay"></div>
+
+<header class="app-header">
+  <div class="logo-area">
+    <div class="logo">RE</div>
+    <div class="app-title">
+      <h1 class="gold-text">Vaztoodix RE Studio</h1>
+      <span class="version">v1.3 — Zones Rouge & Violette animées</span>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="icon-btn" id="btnClose">✕</button>
+  </div>
+</header>
+
+<main class="app-main">
+  <aside class="sidebar">
+    <button class="nav-btn active" data-cat="home" title="Accueil">🏠</button>
+    <button class="nav-btn" data-cat="zone-red" title="Zone Rouge (HTML Brut & Web)">🔴</button>
+    <button class="nav-btn" data-cat="zone-purple" title="Zone Violette (Mods, APK, .exe)">🟣</button>
+    <button class="nav-btn" data-cat="termux" title="Termux">📱</button>
+    <button class="nav-btn" data-cat="linux" title="Linux">🐧</button>
+    <button class="nav-btn" data-cat="ai" title="IA">🤖</button>
+    <button class="nav-btn" data-cat="ides" title="IDEs">💻</button>
+  </aside>
+
+  <section class="center-panel">
+    <div class="panel-header" id="panelHeader">
+      <h2 id="catTitle" class="gold-text">🏠 Accueil</h2>
+      <p id="catDesc">Guide complet de décompilation C++ / .so / APK</p>
+      <input type="text" id="searchBox" class="search-input" placeholder="🔍 Rechercher...">
+    </div>
+    <div class="panel-content" id="content"></div>
+  </section>
+
+  <aside class="right-panel" id="rightPanel">
+    <div class="right-header">
+      <span class="gold-text">📖 Détails</span>
+      <button class="icon-btn" id="btnCollapseRight" style="width:24px;height:24px;font-size:11px;">◧</button>
+    </div>
+    <div class="detail-content" id="detailContent">
+      <p style="font-size:12px;color:#888;text-align:center;padding:20px 0;">
+        👈 Clique sur une carte pour voir les détails, le tutoriel et la fiche Wikipédia.
+      </p>
+    </div>
+  </aside>
+</main>
+
+<script>
+// ============================================================
+// BASE DE CONNAISSANCES
+// ============================================================
+const CATEGORIES = {
+  home: {
+    title: "🏠 Accueil",
+    desc: "Guide complet de décompilation C++ / .so / APK",
+    items: [
+      {
+        id: "intro", name: "Reverse Engineering", icon: "📖", wiki: "Reverse_engineering",
+        desc: "Le reverse engineering (RE) est l'art de comprendre le fonctionnement d'un programme à partir de son code compilé. Sur Android, les applications et jeux sont souvent compilés en fichiers .so (Shared Object) en C++ avec le compilateur NDK. Le RE permet de découvrir des failles, comprendre des protections ou analyser des malwares.",
+        tools: ["Ghidra", "Radare2", "IDA Pro", "Binary Ninja"]
+      },
+      {
+        id: "sofile", name: "Fichier .so", icon: "📦", wiki: "Library_(computing)",
+        desc: "Un fichier .so (Shared Object) est une bibliothèque dynamique utilisée sur Linux et Android. Dans le contexte des jeux mobiles, les anti-cheats et la logique critique sont compilés en .so natif (C/C++ via NDK) pour être plus difficiles à modifier.",
+        tools: ["file", "readelf", "objdump", "nm", "strings"]
+      },
+      {
+        id: "workflow", name: "Workflow Roblox", icon: "🔄", wiki: "Roblox",
+        desc: "Workflow recommandé : 1) saveinstance() pour récupérer l'état du jeu. 2) Décompiler avec Decompiler.com. 3) Nettoyer avec BetterDecompiler. 4) Lire dans VS Code. 5) Documenter.",
+        tools: ["saveinstance()", "Decompiler.com", "BetterDecompiler"]
+      }
+    ]
+  },
+  "zone-red": {
+    title: "🔴 Zone Rouge — HTML Brut & Édition Web",
+    desc: "Code source HTML, structure de la page, manipulation du DOM et outils web en local.",
+    theme: "red",
+    items: [
+      {
+        id: "red-html-struct", name: "Structure HTML Brute", icon: "📄", wiki: "HTML",
+        desc: "Espace dédié à l'analyse et à la modification directe du code source de l'interface web. Permet d'injecter des éléments, de restructurer le layout CSS et d'optimiser le rendu mobile.",
+        tools: ["HTML5", "CSS3", "DOM"],
+        tutorial: `# ===== STRUCTURE HTML BRUTE =====
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Mon Studio Web</title>
+</head>
+<body>
+  <!-- Zone d'injection dynamique -->
+  <div id="app"></div>
+</body>
+</html>
+
+# ===== MODIFICATION DU DOM =====
+document.getElementById('app').innerHTML = '<h1>Hello</h1>';
+# ===== FIN =====`
+      },
+      {
+        id: "red-css-layout", name: "CSS & Layout", icon: "🎨", wiki: "Cascading_Style_Sheets",
+        desc: "Maîtrise du positionnement, des grilles CSS (Grid/Flexbox), des animations et des transitions pour créer des interfaces modernes et réactives.",
+        tools: ["Flexbox", "CSS Grid", "Animations"],
+        tutorial: `/* ===== GRILLE RESPONSIVE ===== */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+/* ===== ANIMATION DE TRANSITION ===== */
+.zone-veil {
+  transition: opacity 0.6s ease, transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.zone-veil.active {
+  opacity: 1;
+  transform: translateX(0) skewX(0);
+}`
+      },
+      {
+        id: "red-js-engine", name: "Moteur JavaScript Local", icon: "⚡", wiki: "JavaScript",
+        desc: "Scripts embarqués gérant l'interactivité de la page, le filtrage des cartes en temps réel et la mise en cache des requêtes asynchrones.",
+        tools: ["ES6+", "Fetch API", "Async/Await"]
+      },
+      {
+        id: "red-devtools", name: "DevTools & Debug", icon: "🛠️", wiki: "Web_development_tools",
+        desc: "Utilisation des outils de développement navigateur (F12) pour inspecter le DOM, surveiller le réseau, déboguer le JavaScript et analyser les performances.",
+        tools: ["Chrome DevTools", "Firefox DevTools", "Lighthouse"]
+      }
+    ]
+  },
+  "zone-purple": {
+    title: "🟣 Zone Violette — Mods, APK & Binaires",
+    desc: "Modification de paquets APK, analyse d'exécutables Windows (.exe/.dll) et outillage de modding.",
+    theme: "purple",
+    items: [
+      {
+        id: "purple-apk", name: "Fichiers APK & Smali", icon: "📦", wiki: "Android_Package",
+        desc: "Analyse, décompilation et recompilation de packages Android (.apk). Modification des manifests, injection de scripts smali et signature de paquets modifiés.",
+        tools: ["Apktool", "JADX", "apksigner"],
+        tutorial: `# ===== MANIPULATION APK =====
+# 1. Décompiler
+apktool d application.apk
+
+# 2. Modifier le smali dans application/smali/
+# 3. Recompiler
+apktool b application -out modded.apk
+
+# 4. Générer une clé
+keytool -genkey -v -keystore my-key.jks \\
+  -keyalg RSA -keysize 2048 -validity 10000 -alias my-alias
+
+# 5. Signer
+apksigner sign --ks my-key.jks modded.apk
+# ===== FIN =====`
+      },
+      {
+        id: "purple-exe", name: "Binaires Windows (.exe / .dll)", icon: "💻", wiki: "Portable_Executable",
+        desc: "Analyse de structures PE (Portable Executable) pour les exécutables Windows et les bibliothèques dynamiques (.dll). Désassemblage et patchs de code natif.",
+        tools: ["PEview", "Ghidra", "x64dbg"],
+        tutorial: `# ===== ANALYSE PE =====
+# 1. Inspecter les en-têtes
+peview monprogramme.exe
+
+# 2. Décompiler avec Ghidra
+analyzeHeadless /projets Projet -import monprogramme.exe
+
+# 3. Déboguer avec x64dbg
+x64dbg monprogramme.exe
+# Breakpoints, step, registres, mémoire
+# ===== FIN =====`
+      },
+      {
+        id: "purple-smali", name: "Injection Smali", icon: "🔧", wiki: "Smali",
+        desc: "Le smali est l'assembleur Dalvik. Modifier le smali permet d'altérer la logique d'une application Android sans toucher aux sources Java originales.",
+        tools: ["smali/baksmali", "Apktool", "JADX"],
+        tutorial: `# ===== PATCH SMALI =====
+# 1. Décompiler
+apktool d app.apk
+
+# 2. Trouver la méthode cible
+grep -r "checkLicense" app/smali/
+
+# 3. Patcher : forcer le retour true
+# Avant :
+#   invoke-virtual {v0}, Lcom/app/License;->check()Z
+#   move-result v1
+# Après :
+#   const/4 v1, 0x1   # true
+
+# 4. Recompiler + signer
+apktool b app -o patched.apk
+apksigner sign --ks key.jks patched.apk`
+      },
+      {
+        id: "purple-elf", name: "Binaires ELF & .so", icon: "🐧", wiki: "Executable_and_Linkable_Format",
+        desc: "Analyse des fichiers ELF (Linux/Android), notamment les bibliothèques natives .so utilisées par les jeux et applications. Désassemblage ARM/ARM64/x86.",
+        tools: ["readelf", "objdump", "Ghidra", "Radare2"],
+        tutorial: `# ===== ANALYSE .so =====
+# 1. Identifier l'architecture
+file libtarget.so
+# ELF 64-bit LSB shared object, ARM aarch64
+
+# 2. Lister les symboles exportés
+nm -D libtarget.so | grep Java_
+
+# 3. Désassembler
+objdump -d libtarget.so > disasm.txt
+
+# 4. Analyser avec Radare2
+r2 -A libtarget.so
+[0x0]> afl          # liste fonctions
+[0x0]> pdf @ main   # décompile main
+
+# 5. Décompiler avec Ghidra
+analyzeHeadless /projets P -import libtarget.so`
+      }
+    ]
+  },
+  termux: {
+    title: "📱 Termux (Android)",
+    desc: "Outils de reverse engineering sur Android",
+    items: [
+      {
+        id: "termux-radare2", name: "Radare2", icon: "🔧", wiki: "Radare2",
+        desc: "Radare2 est une suite d'outils open-source en ligne de commande pour l'analyse de binaires. Il fonctionne sur Termux sans proot, ce qui en fait l'outil idéal pour analyser rapidement un fichier .so sur Android.",
+        tools: ["radare2", "rabin2", "radiff2"],
+        tutorial: `# ===== RADARE2 SUR TERMUX =====
+pkg update && pkg upgrade -y
+pkg install radare2 -y
+
+r2 -A libtarget.so
+[0x0]> aaa           # analyse complète
+[0x0]> afl           # liste fonctions
+[0x0]> pdf @ main    # décompile main
+[0x0]> q             # quitter
+
+# Décompilation avancée
+r2pm update
+r2pm install r2ghidra
+# pdg @ main`
+      },
+      {
+        id: "termux-ghidra", name: "Ghidra (proot)", icon: "🔬", wiki: "Ghidra",
+        desc: "Ghidra est l'outil de reverse engineering gratuit développé par la NSA. Sur Termux, on l'installe via proot-distro Ubuntu pour avoir un environnement Linux complet.",
+        tools: ["proot-distro", "Ghidra", "Java JDK"],
+        tutorial: `# ===== GHIDRA SUR TERMUX =====
+pkg install proot-distro -y
+proot-distro install ubuntu
+proot-distro login ubuntu
+
+apt update && apt install openjdk-17-jdk wget unzip -y
+cd /opt
+wget https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_11.0.3_build/ghidra_11.0.3_PUBLIC_20240410.zip
+unzip ghidra_11.0.3_PUBLIC_20240410.zip
+./ghidra/support/analyzeHeadless /root/projets P -import libtarget.so`
+      },
+      {
+        id: "termux-apktool", name: "Apktool", icon: "📦", wiki: "Apktool",
+        desc: "Apktool décompile les APK Android en ressources lisibles (XML, smali). C'est la première étape avant de chercher les fichiers .so dans l'APK.",
+        tools: ["apktool", "keytool", "apksigner"],
+        tutorial: `# ===== APKTOOL SUR TERMUX =====
+pkg install wget openjdk-17 -y
+wget https://github.com/Termux-Apktool/apktool/releases/download/v2.3.4/apktool_2.3.4_all.deb
+dpkg -i apktool_2.3.4_all.deb
+
+apktool d monapp.apk
+find monapp/lib -name "*.so"
+apktool b monapp -o modded.apk
+apksigner sign --ks ma-cle.keystore modded.apk`
+      }
+    ]
+  },
+  linux: {
+    title: "🐧 Linux (binaires généraux)",
+    desc: "Outils pour analyser DLL, EXE, ELF, Mach-O",
+    items: [
+      {
+        id: "linux-ghidra", name: "Ghidra (Linux)", icon: "🔬", wiki: "Ghidra",
+        desc: "Ghidra est l'outil de référence pour décompiler du C++ compilé sous Linux. Il supporte ELF, PE, Mach-O et de nombreux autres formats. Son décompilateur intégré produit du pseudo-code C très lisible.",
+        tools: ["Ghidra", "Java 17", "analyzeHeadless"],
+        tutorial: `# ===== GHIDRA SUR LINUX =====
+sudo apt install openjdk-17-jdk -y
+cd /opt
+sudo wget https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_11.0.3_build/ghidra_11.0.3_PUBLIC_20240410.zip
+sudo unzip ghidra_11.0.3_PUBLIC_20240410.zip
+sudo mv ghidra_11.0.3_PUBLIC ghidra
+
+# GUI
+cd /opt/ghidra && ./ghidraRun
+
+# Headless
+/opt/ghidra/support/analyzeHeadless /home/user/projets P -import libtarget.so`
+      },
+      {
+        id: "linux-binutils", name: "Binutils", icon: "🛠️", wiki: "GNU_Binutils",
+        desc: "Binutils est un ensemble d'outils GNU pour manipuler les binaires ELF. readelf affiche les en-têtes, objdump désassemble, nm liste les symboles. C'est l'outil de base pour toute analyse de binaire sur Linux.",
+        tools: ["readelf", "objdump", "nm", "strings", "file"],
+        tutorial: `# ===== BINUTILS =====
+sudo apt install binutils -y
+
+file libtarget.so
+readelf -h libtarget.so     # en-têtes
+readelf -s libtarget.so     # symboles
+objdump -d libtarget.so     # désassemblage
+nm -D libtarget.so          # symboles dynamiques
+strings libtarget.so        # chaînes
+ldd libtarget.so            # dépendances`
+      }
+    ]
+  },
+  ai: {
+    title: "🤖 IA & Reverse Engineering",
+    desc: "Outils IA modernes pour accélérer la décompilation",
+    items: [
+      {
+        id: "ai-ghidramcp", name: "GhidraMCP", icon: "🌉", wiki: "Model_Context_Protocol",
+        desc: "GhidraMCP est un bridge MCP gratuit entre Ghidra et n'importe quel client LLM (Claude, GPT, etc.). Il permet le renommage automatique, la summarization et les cross-references automatisés.",
+        tools: ["Ghidra", "MCP", "Python", "LLM"],
+        tutorial: `# ===== GHIDRAMCP =====
+git clone https://github.com/LaurieWired/GhidraMCP.git
+cd GhidraMCP
+pip install -r requirements.txt
+
+# Installer le plugin dans Ghidra
+# File → Install Extensions → GhidraMCP
+
+python3 bridge_mcp_ghidra.py
+# Connecter un client LLM (Claude Desktop / VS Code)`
+      },
+      {
+        id: "ai-betterdecompiler", name: "BetterDecompiler", icon: "🎮", wiki: "Roblox",
+        desc: "BetterDecompiler est un outil spécifique Roblox. Son IA ne fait que suggérer des noms de variables (pas de réécriture), donc il y a zéro risque de bug.",
+        tools: ["Luau", "IA", "Roblox"],
+        tutorial: `# ===== BETTERDECOMPILER =====
+# 1. In-game :
+saveinstance()
+
+# 2. Décompiler sur Decompiler.com
+# 3. Ouvrir le code Luau dans BetterDecompiler
+# L'IA suggère des noms :
+# v1 → player
+# v2 → character
+# v3 → humanoid
+
+# 4. Toujours relire manuellement`
+      }
+    ]
+  },
+  ides: {
+    title: "💻 IDEs recommandés",
+    desc: "Claude Code, VS Code, Cursor",
+    items: [
+      {
+        id: "ide-claude", name: "Claude Code", icon: "🤖", wiki: "Claude_(language_model)",
+        desc: "Claude Code est l'IDE en ligne de commande d'Anthropic. Il permet de discuter avec Claude directement dans le terminal, d'analyser du code décompilé, de renommer des variables et de générer des rapports.",
+        tools: ["Node.js", "Claude API"],
+        tutorial: `# ===== CLAUDE CODE =====
+npm install -g @anthropic-ai/claude-code
+claude login
+
+cd /chemin/vers/code_decompile
+claude
+# "Analyse ce code C++ décompilé"
+# "Renomme les variables sub_XXX"
+# "Génère un rapport Markdown"`
+      },
+      {
+        id: "ide-vscode", name: "VS Code", icon: "💙", wiki: "Visual_Studio_Code",
+        desc: "Visual Studio Code est l'IDE le plus populaire. Avec les extensions C/C++, Ghidra et Claude Dev, il devient un outil de reverse engineering puissant.",
+        tools: ["VS Code", "C/C++", "Claude Dev"],
+        tutorial: `# ===== VS CODE =====
+sudo apt install code -y
+
+code --install-extension ms-vscode.cpptools
+code --install-extension anthropic.claude-dev
+code --install-extension mhutchie.git-graph
+
+code /chemin/vers/code_decompile
+# Ctrl+Shift+P → Claude Dev: New Chat`
+      }
+    ]
+  }
+};
+
+// ============================================================
+// WIKIPÉDIA API
+// ============================================================
+const wikiCache = {};
+
+async function fetchWikipedia(page, lang = "fr") {
+  const key = lang + ":" + page;
+  if (wikiCache[key]) return wikiCache[key];
+  try {
+    const url = `https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(page)}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    const result = {
+      title: data.title || page,
+      extract: data.extract || "Aucun résumé disponible.",
+      url: data.content_urls?.desktop?.page || `https://${lang}.wikipedia.org/wiki/${page}`
+    };
+    wikiCache[key] = result;
+    return result;
+  } catch (e) {
+    return { title: page, extract: "⚠️ Wikipédia inaccessible (vérifie ta connexion).", url: `https://fr.wikipedia.org/wiki/${page}`, error: true };
+  }
+}
+
+// ============================================================
+// STATE
+// ============================================================
+const AppState = { currentCat: "home", searchQuery: "" };
+
+// ============================================================
+// GESTION DES VOILES ET TRANSITIONS
+// ============================================================
+const veilRed = document.getElementById("veilRed");
+const veilPurple = document.getElementById("veilPurple");
+const sweepOverlay = document.getElementById("sweepOverlay");
+
+function updateZoneVeils(catName) {
+  const cat = CATEGORIES[catName];
+  const theme = cat?.theme || null;
+
+  // Voile rouge : visible si zone-red
+  if (theme === "red") {
+    veilRed.classList.add("active");
+    veilPurple.classList.remove("active");
+  } else if (theme === "purple") {
+    veilPurple.classList.add("active");
+    veilRed.classList.remove("active");
+  } else {
+    // Aucune zone spéciale → on retire les deux
+    veilRed.classList.remove("active");
+    veilPurple.classList.remove("active");
+  }
+}
+
+function triggerSweep(theme) {
+  if (!theme) return;
+  sweepOverlay.classList.remove("fire", "from-left", "from-right");
+  // Forcer reflow pour relancer l'animation
+  void sweepOverlay.offsetWidth;
+  sweepOverlay.classList.add("fire", theme === "red" ? "from-left" : "from-right");
+  setTimeout(() => {
+    sweepOverlay.classList.remove("fire", "from-left", "from-right");
+  }, 800);
+}
+
+// ============================================================
+// THÈME DES PANNEAUX
+// ============================================================
+function updatePanelsTheme(theme) {
+  const panelHeader = document.getElementById("panelHeader");
+  const rightPanel = document.getElementById("rightPanel");
+  panelHeader.classList.remove("zone-red-theme", "zone-purple-theme");
+  rightPanel.classList.remove("zone-red-theme", "zone-purple-theme");
+  if (theme === "red") {
+    panelHeader.classList.add("zone-red-theme");
+    rightPanel.classList.add("zone-red-theme");
+  } else if (theme === "purple") {
+    panelHeader.classList.add("zone-purple-theme");
+    rightPanel.classList.add("zone-purple-theme");
+  }
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function showCategory(catName) {
+  const cat = CATEGORIES[catName];
+  if (!cat) return;
+
+  const previousCat = AppState.currentCat;
+  const previousTheme = CATEGORIES[previousCat]?.theme || null;
+  const newTheme = cat.theme || null;
+
+  // Déclencher l'animation seulement si on entre ou sort d'une zone colorée
+  if (newTheme && newTheme !== previousTheme) {
+    triggerSweep(newTheme);
+  } else if (!newTheme && previousTheme) {
+    // On sort d'une zone colorée → balayage inverse (même couleur)
+    triggerSweep(previousTheme);
+  }
+
+  AppState.currentCat = catName;
+  document.querySelectorAll(".nav-btn").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.cat === catName);
+  });
+
+  // Mise à jour des voiles et thèmes
+  updateZoneVeils(catName);
+  updatePanelsTheme(newTheme);
+
+  document.getElementById("catTitle").textContent = cat.title;
+  document.getElementById("catDesc").textContent = cat.desc;
+  renderContent();
+}
+
+// ============================================================
+// RENDU DES CARTES
+// ============================================================
+function renderContent() {
+  const cat = CATEGORIES[AppState.currentCat];
+  let items = cat.items;
+  if (AppState.searchQuery) {
+    items = items.filter(it =>
+      it.name.toLowerCase().includes(AppState.searchQuery) ||
+      it.desc.toLowerCase().includes(AppState.searchQuery)
+    );
+  }
+  const container = document.getElementById("content");
+  container.innerHTML = "";
+
+  if (items.length === 0) {
+    container.innerHTML = `<p style="font-size:12px;color:#888;text-align:center;padding:20px;">Aucun élément dans cette catégorie.</p>`;
+    return;
+  }
+
+  const grid = document.createElement("div");
+  grid.className = "cards-grid";
+
+  const theme = cat.theme || null;
+
+  items.forEach(it => {
+    const card = document.createElement("div");
+    card.className = "card" + (theme === "red" ? " card-red" : theme === "purple" ? " card-purple" : "");
+    card.innerHTML = `
+      <div class="card-title">
+        <span>${it.icon}</span>
+        <span class="gold-text">${it.name}</span>
+      </div>
+      <div class="card-desc">${it.desc.substring(0, 130)}${it.desc.length > 130 ? "..." : ""}</div>
+      <div class="detail-meta" style="margin-top:8px;">
+        ${(it.tools || []).slice(0, 3).map(t => `<span class="meta-tag">${t}</span>`).join("")}
+      </div>
+    `;
+    card.addEventListener("click", () => selectItem(it.id));
+    grid.appendChild(card);
+  });
+
+  container.appendChild(grid);
+  container.scrollTop = 0;
+}
+
+// ============================================================
+// SÉLECTION D'UN ÉLÉMENT
+// ============================================================
+function selectItem(id) {
+  for (const catName in CATEGORIES) {
+    const item = CATEGORIES[catName].items.find(it => it.id === id);
+    if (item) {
+      renderDetail(item);
+      document.getElementById("rightPanel").scrollTop = 0;
+      if (window.innerWidth < 900) {
+        document.getElementById("rightPanel").scrollIntoView({ behavior: "smooth" });
+      }
+      return;
+    }
+  }
+}
+
+// ============================================================
+// RENDU DES DÉTAILS
+// ============================================================
+async function renderDetail(item) {
+  const container = document.getElementById("detailContent");
+
+  let html = `
+    <div class="detail-title gold-text">${item.icon} ${item.name}</div>
+    <div class="detail-desc">${item.desc}</div>
+    <div class="detail-meta">
+      ${(item.tools || []).map(t => `<span class="meta-tag">${t}</span>`).join("")}
+    </div>
+  `;
+
+  if (item.tutorial) {
+    html += `
+      <div style="margin-top:12px;">
+        <div class="gold-text" style="font-size:12px;margin-bottom:6px;">📋 Tutoriel complet</div>
+        <div class="tutorial-content">${formatTutorial(item.tutorial)}</div>
+      </div>
+    `;
+  }
+
+  if (item.wiki) {
+    html += `
+      <div style="margin-top:12px;">
+        <div class="gold-text" style="font-size:12px;margin-bottom:6px;">🌐 Fiche Wikipédia</div>
+        <div class="wiki-box" id="wikiBox">
+          <div class="wiki-title">${item.wiki}</div>
+          <div class="wiki-loading">Chargement depuis Wikipédia...</div>
+        </div>
+      </div>
+    `;
+  }
+
+  container.innerHTML = html;
+
+  if (item.wiki) {
+    try {
+      const wiki = await fetchWikipedia(item.wiki, "fr");
+      const box = document.getElementById("wikiBox");
+      if (box) {
+        if (wiki.error) {
+          box.innerHTML = `
+            <div class="wiki-title">${wiki.title}</div>
+            <div class="wiki-loading">⚠️ Wikipédia inaccessible. <a href="${wiki.url}" target="_blank">Ouvrir sur Wikipédia</a></div>
+          `;
+        } else {
+          box.innerHTML = `
+            <div class="wiki-title">${wiki.title}</div>
+            <div>${wiki.extract}</div>
+            <div style="margin-top:8px;"><a href="${wiki.url}" target="_blank">📖 Lire l'article complet</a></div>
+          `;
+        }
+      }
+    } catch (e) {
+      console.warn("Erreur wiki:", e);
+    }
+  }
+}
+
+// ============================================================
+// FORMATAGE DES TUTORIELS
+// ============================================================
+function formatTutorial(text) {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/^(#.*)$/gm, '<span class="comment">$1</span>')
+    .replace(/(pkg install|apt install|pip install|git clone|npm install|wget|curl|sudo|cd |mkdir |chmod |\.\/|apktool|apksigner|keytool)/g, '<span class="cmd">$1</span>')
+    .replace(/(r2|ghidra|radare2|jadx|apktool|readelf|objdump|nm|strings|file|saveinstance)/gi, '<span class="keyword">$1</span>');
+}
+
+// ============================================================
+// INITIALISATION
+// ============================================================
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".nav-btn").forEach(btn => {
+    btn.addEventListener("click", () => showCategory(btn.dataset.cat));
+  });
+  document.getElementById("searchBox").addEventListener("input", (e) => {
+    AppState.searchQuery = e.target.value.toLowerCase();
+    renderContent();
+  });
+  document.getElementById("btnClose")?.addEventListener("click", () => {
+    if (confirm("Fermer Vaztoodix RE Studio ?")) window.close();
+  });
+  document.getElementById("btnCollapseRight")?.addEventListener("click", () => {
+    document.getElementById("rightPanel").classList.toggle("collapsed");
+  });
+  showCategory("home");
+});
+
+console.log("[Vaztoodix RE Studio] Initialisé ✅");
+</script>
+
+</body>
+</html>
