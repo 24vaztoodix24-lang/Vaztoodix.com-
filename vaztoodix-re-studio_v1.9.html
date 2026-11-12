@@ -1,0 +1,1859 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Vaztoodix RE Studio — Édition & Mods</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body {
+  height: 100%;
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: radial-gradient(circle at top left, #0a0a0f, #050508 60%, #020204);
+  color: #e8e8f0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.gold-text {
+  background: linear-gradient(135deg, #ffd700 0%, #ffb300 25%, #fff8b0 50%, #ffb300 75%, #b8860b 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: bold;
+}
+.pink-rayan {
+  color: #ff79c6;
+  font-weight: bold;
+  text-shadow: 0 0 8px rgba(255, 121, 198, 0.6);
+}
+
+/* ===== VOILES ANIMÉS ===== */
+.zone-veil {
+  position: fixed;
+  top: 0;
+  width: 55vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0;
+  transition: opacity 0.6s ease, transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.zone-veil.red {
+  left: 0;
+  background: radial-gradient(ellipse at top left, rgba(255, 40, 40, 0.45) 0%, rgba(180, 0, 0, 0.18) 35%, transparent 70%);
+  transform: translateX(-100%) skewX(-8deg);
+}
+.zone-veil.purple {
+  right: 0;
+  background: radial-gradient(ellipse at top right, rgba(189, 147, 249, 0.45) 0%, rgba(98, 114, 164, 0.18) 35%, transparent 70%);
+  transform: translateX(100%) skewX(8deg);
+}
+.zone-veil.active {
+  opacity: 1;
+  transform: translateX(0) skewX(0);
+}
+
+.sweep-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 999;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.sweep-overlay.fire {
+  animation: sweepFire 0.75s cubic-bezier(0.7, 0, 0.3, 1) forwards;
+}
+.sweep-overlay.fire.from-left {
+  background: linear-gradient(90deg, rgba(255, 50, 50, 0.85) 0%, rgba(255, 50, 50, 0.35) 45%, transparent 100%);
+}
+.sweep-overlay.fire.from-right {
+  background: linear-gradient(270deg, rgba(189, 147, 249, 0.85) 0%, rgba(189, 147, 249, 0.35) 45%, transparent 100%);
+}
+@keyframes sweepFire {
+  0%   { opacity: 0; transform: translateX(0); }
+  15%  { opacity: 1; }
+  100% { opacity: 0; transform: translateX(0); }
+}
+
+.app-header {
+  height: 52px;
+  background: rgba(15, 15, 25, 0.85);
+  border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+  z-index: 100;
+  flex-shrink: 0;
+  position: relative;
+}
+.logo-area { display: flex; align-items: center; gap: 10px; }
+.logo {
+  width: 36px; height: 36px;
+  background: radial-gradient(circle, #ffd700, #b8860b);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: bold; font-size: 11px; color: #1a1a1a;
+}
+.app-title h1 { font-size: 14px; }
+.app-title .version { font-size: 10px; color: #888; }
+.header-actions { display: flex; gap: 6px; align-items: center; }
+.icon-btn {
+  width: 32px; height: 32px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  border-radius: 8px;
+  color: #e8e8f0;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+}
+.icon-btn:active { background: rgba(255, 215, 0, 0.15); }
+
+/* ===== Icône Discord dorée dans le header ===== */
+.discord-icon-btn {
+  width: 32px; height: 32px;
+  background: rgba(255, 215, 0, 0.08);
+  border: 1px solid rgba(255, 215, 0, 0.45);
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.25);
+  transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+  padding: 0;
+}
+.discord-icon-btn svg { width: 20px; height: 20px; display: block; }
+.discord-icon-btn svg path { fill: #ffd700; }
+.discord-icon-btn:hover { background: rgba(255, 215, 0, 0.18); box-shadow: 0 0 16px rgba(255, 215, 0, 0.5); }
+.discord-icon-btn:active { transform: scale(0.92); }
+
+.app-main {
+  flex: 1;
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  overflow: hidden;
+  min-height: 0;
+  z-index: 10;
+  position: relative;
+}
+.sidebar {
+  width: 52px;
+  background: rgba(15, 15, 25, 0.7);
+  border: 1px solid rgba(255, 215, 0, 0.15);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 0;
+  gap: 6px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  backdrop-filter: blur(8px);
+}
+.nav-btn {
+  width: 38px; height: 38px;
+  background: rgba(40, 40, 60, 0.6);
+  border: 1px solid rgba(255, 215, 0, 0.1);
+  border-radius: 9px;
+  font-size: 16px;
+  cursor: pointer;
+  color: #e8e8f0;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+  transition: transform 0.2s, background 0.3s, border-color 0.3s;
+}
+.nav-btn:active { transform: scale(0.92); }
+.nav-btn.active {
+  background: linear-gradient(135deg, #ffd700, #b8860b);
+  color: #1a1a1a;
+  border-color: #fff8b0;
+}
+.nav-btn[data-cat="zone-red"].active {
+  background: linear-gradient(135deg, #ff5555, #aa0000);
+  color: #fff;
+  border-color: #ff9999;
+  box-shadow: 0 0 12px rgba(255, 60, 60, 0.6);
+}
+.nav-btn[data-cat="zone-purple"].active {
+  background: linear-gradient(135deg, #bd93f9, #6272a4);
+  color: #fff;
+  border-color: #d7b3ff;
+  box-shadow: 0 0 12px rgba(189, 147, 249, 0.6);
+}
+.nav-btn[data-cat="cheat"].active {
+  background: linear-gradient(135deg, #ff79c6, #ff5555);
+  color: #fff;
+  border-color: #ffb86c;
+  box-shadow: 0 0 12px rgba(255, 121, 198, 0.6);
+}
+
+.center-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  min-height: 0;
+}
+.panel-header {
+  background: rgba(15, 15, 25, 0.7);
+  border: 1px solid rgba(255, 215, 0, 0.15);
+  border-radius: 12px;
+  padding: 10px 14px;
+  flex-shrink: 0;
+  backdrop-filter: blur(8px);
+  transition: border-color 0.5s;
+}
+.panel-header.zone-red-theme { border-color: rgba(255, 60, 60, 0.5); box-shadow: 0 0 20px rgba(255, 60, 60, 0.15); }
+.panel-header.zone-purple-theme { border-color: rgba(189, 147, 249, 0.5); box-shadow: 0 0 20px rgba(189, 147, 249, 0.15); }
+.panel-header.cheat-theme { border-color: rgba(255, 121, 198, 0.5); box-shadow: 0 0 20px rgba(255, 121, 198, 0.15); }
+
+.panel-header h2 { font-size: 15px; margin-bottom: 2px; }
+.panel-header p { font-size: 11px; color: #999; }
+.search-input {
+  width: 100%; height: 26px;
+  margin-top: 8px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  border-radius: 7px;
+  padding: 0 10px;
+  color: #e8e8f0;
+  font-size: 12px;
+  outline: none;
+}
+.panel-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 4px;
+  border-radius: 12px;
+  min-height: 0;
+  -webkit-overflow-scrolling: touch;
+}
+.panel-content::-webkit-scrollbar { width: 6px; }
+.panel-content::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #ffd700, #b8860b); border-radius: 3px; }
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+  padding-bottom: 20px;
+}
+.card {
+  background: rgba(25, 25, 40, 0.8);
+  border: 1px solid rgba(255, 215, 0, 0.15);
+  border-radius: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s, border-color 0.3s, box-shadow 0.3s;
+  min-height: 90px;
+  display: block;
+  user-select: none;
+  backdrop-filter: blur(4px);
+}
+.card:active {
+  background: rgba(35, 35, 55, 0.9);
+  border-color: rgba(255, 215, 0, 0.4);
+  transform: scale(0.98);
+}
+.card.card-red { border-color: rgba(255, 60, 60, 0.35); }
+.card.card-purple { border-color: rgba(189, 147, 249, 0.35); }
+.card.card-cheat { border-color: rgba(255, 121, 198, 0.35); }
+
+.card-title {
+  font-size: 13px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.card-desc {
+  font-size: 11px;
+  color: #a0a0b0;
+  line-height: 1.5;
+}
+.right-panel {
+  width: 42%;
+  min-width: 320px;
+  background: rgba(15, 15, 25, 0.75);
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  min-height: 0;
+  -webkit-overflow-scrolling: touch;
+  backdrop-filter: blur(8px);
+  transition: border-color 0.5s, box-shadow 0.5s;
+}
+.right-panel.zone-red-theme { border-color: rgba(255, 60, 60, 0.5); box-shadow: 0 0 20px rgba(255, 60, 60, 0.15); }
+.right-panel.zone-purple-theme { border-color: rgba(189, 147, 249, 0.5); box-shadow: 0 0 20px rgba(189, 147, 249, 0.15); }
+.right-panel.cheat-theme { border-color: rgba(255, 121, 198, 0.5); box-shadow: 0 0 20px rgba(255, 121, 198, 0.15); }
+
+.right-panel.collapsed { width: 48px; min-width: 48px; padding: 6px 4px; }
+.right-panel.collapsed .detail-content { display: none; }
+.right-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+.detail-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  min-height: 0;
+}
+.detail-title { font-size: 16px; margin-bottom: 4px; }
+.detail-desc {
+  font-size: 12px;
+  color: #b0b0c0;
+  line-height: 1.6;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  border-left: 3px solid #ffd700;
+}
+.detail-desc.lua-card {
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 1.7;
+  color: #e8e8f0;
+}
+.detail-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 11px; }
+.meta-tag {
+  background: rgba(255, 215, 0, 0.1);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 6px;
+  padding: 4px 10px;
+  color: #ffd700;
+}
+.tutorial-content {
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 11px;
+  line-height: 1.7;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+  padding: 12px;
+  border: 1px solid rgba(255, 215, 0, 0.15);
+  white-space: pre-wrap;
+  color: #c0c0d0;
+  overflow-x: auto;
+}
+.tutorial-content .cmd { color: #50dc78; font-weight: bold; }
+.tutorial-content .comment { color: #6a6a80; font-style: italic; }
+.tutorial-content .keyword { color: #ffd700; font-weight: bold; }
+.wiki-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 11px;
+  line-height: 1.6;
+  color: #c0c0d0;
+}
+.wiki-box .wiki-title { font-size: 12px; font-weight: bold; margin-bottom: 6px; color: #ffd700; }
+.wiki-box .wiki-loading { color: #888; font-style: italic; }
+.wiki-box a { color: #ffd700; text-decoration: underline; word-break: break-all; }
+
+/* ===== BOUTONS DE LIENS EXTERNES ===== */
+.link-btn {
+  width: 100%;
+  height: 34px;
+  font-size: 12px;
+  border-radius: 7px;
+  cursor: pointer;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  background: rgba(255, 215, 0, 0.1);
+  color: #ffd700;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.2s, transform 0.15s;
+}
+.link-btn:active { transform: scale(0.97); }
+.link-btn.mega { border-color: rgba(255, 60, 60, 0.4); color: #ff8888; background: rgba(255, 60, 60, 0.1); }
+.link-btn.telegram { border-color: rgba(50, 160, 255, 0.5); color: #6ab8ff; background: rgba(50, 160, 255, 0.1); }
+.link-btn.discord { border-color: rgba(114, 137, 218, 0.5); color: #9ba7f5; background: rgba(114, 137, 218, 0.12); }
+.link-btn.sharezip { border-color: rgba(80, 220, 120, 0.5); color: #50dc78; background: rgba(80, 220, 120, 0.1); }
+
+@media (max-width: 900px) {
+  .app-main { flex-direction: column; padding: 4px; }
+  .sidebar { width: 100%; height: 50px; flex-direction: row; padding: 6px; overflow-x: auto; }
+  .nav-btn { width: 36px; height: 36px; }
+  .right-panel { width: 100%; min-width: unset; height: 45vh; }
+  .right-panel.collapsed { height: 48px; width: 100%; min-width: unset; }
+  .cards-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .zone-veil { width: 80vw; }
+}
+@media (max-width: 500px) {
+  .cards-grid { grid-template-columns: 1fr; }
+  .app-title h1 { font-size: 12px; }
+  .logo { width: 32px; height: 32px; font-size: 10px; }
+}
+</style>
+</head>
+<body>
+
+<div class="zone-veil red" id="veilRed"></div>
+<div class="zone-veil purple" id="veilPurple"></div>
+<div class="sweep-overlay" id="sweepOverlay"></div>
+
+<header class="app-header">
+  <div class="logo-area">
+    <div class="logo">RE</div>
+    <div class="app-title">
+      <h1 class="gold-text">Vaztoodix RE Studio</h1>
+      <span class="version">v1.8 — Switch Games, IOS Modding & Discord</span>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="discord-icon-btn" id="btnDiscordHeader" title="Rejoindre le Discord" aria-label="Rejoindre le Discord">
+      <svg viewBox="0 0 127.14 96.36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/>
+      </svg>
+    </button>
+    <button class="icon-btn" id="btnClose">✕</button>
+  </div>
+</header>
+
+<main class="app-main">
+  <aside class="sidebar">
+    <button class="nav-btn active" data-cat="home" title="Accueil">🏠</button>
+    <button class="nav-btn" data-cat="cheat" title="Zone Cheat & Switch Games">🏴‍☠️</button>
+    <button class="nav-btn" data-cat="zone-red" title="Zone Rouge (IOS / Modding Rayan)">🔴</button>
+    <button class="nav-btn" data-cat="zone-purple" title="Zone Violette (Mods & APK)">🟣</button>
+    <button class="nav-btn" data-cat="termux" title="Termux">📱</button>
+    <button class="nav-btn" data-cat="linux" title="Linux & Outils IA">🐧</button>
+    <button class="nav-btn" data-cat="ai" title="IA & MCP">🤖</button>
+    <button class="nav-btn" data-cat="ides" title="IDEs">💻</button>
+  </aside>
+
+  <section class="center-panel">
+    <div class="panel-header" id="panelHeader">
+      <h2 id="catTitle" class="gold-text">🏠 Accueil</h2>
+      <p id="catDesc">Guide complet de décompilation C++ / .so / APK</p>
+      <input type="text" id="searchBox" class="search-input" placeholder="🔍 Rechercher...">
+    </div>
+    <div class="panel-content" id="content"></div>
+  </section>
+
+  <aside class="right-panel" id="rightPanel">
+    <div class="right-header">
+      <span class="gold-text">📖 Détails</span>
+      <button class="icon-btn" id="btnCollapseRight" style="width:24px;height:24px;font-size:11px;">◧</button>
+    </div>
+    <div class="detail-content" id="detailContent">
+      <p style="font-size:12px;color:#888;text-align:center;padding:20px 0;">
+        👈 Clique sur une carte pour voir les détails, le tutoriel et la fiche Wikipédia.
+      </p>
+    </div>
+  </aside>
+</main>
+
+<script>
+// ============================================================
+// BASE DE CONNAISSANCES — contenu complet v0.3 + zones v1.8
+// ============================================================
+const CATEGORIES = {
+  home: {
+    title: "🏠 Accueil",
+    desc: "Guide complet de décompilation C++ / .so / APK",
+    items: [
+      {
+        id: "intro", name: "Reverse Engineering", icon: "📖", wiki: "Reverse_engineering",
+        desc: "Le reverse engineering (RE) est l'art de comprendre le fonctionnement d'un programme à partir de son code compilé. Sur Android, les applications et jeux sont souvent compilés en fichiers .so (Shared Object) en C++ avec le compilateur NDK. Le RE permet de découvrir des failles, comprendre des protections ou analyser des malwares. C'est une discipline légale dans un cadre éthique (recherche, sécurité, interopérabilité) mais illégale si utilisée pour contourner des protections sans autorisation.",
+        tools: ["Ghidra", "Radare2", "IDA Pro", "Binary Ninja"]
+      },
+      {
+        id: "sofile", name: "Fichier .so", icon: "📦", wiki: "Library_(computing)",
+        desc: "Un fichier .so (Shared Object) est une bibliothèque dynamique utilisée sur Linux et Android. Dans le contexte des jeux mobiles comme Roblox, les anti-cheats et la logique critique du jeu sont compilés en .so natif (C/C++ via NDK) pour être plus difficiles à modifier. Le reverse engineering de ces fichiers permet de comprendre les protections, les algorithmes de chiffrement ou les mécanismes de détection. Un .so contient du code machine spécifique à une architecture (ARM, ARM64, x86, x64).",
+        tools: ["file", "readelf", "objdump", "nm", "strings"]
+      },
+      {
+        id: "workflow", name: "Workflow Roblox", icon: "🔄", wiki: "Roblox",
+        desc: "Le workflow recommandé pour analyser un jeu Roblox est le suivant : 1) En jeu, exécuter saveinstance() pour récupérer l'état actuel du jeu (fichier .rbxl). 2) Décompiler ce fichier avec Decompiler.com ou un décompilateur Luau local. 3) Nettoyer le code avec l'IA BetterDecompiler qui suggère des noms de variables. 4) Lire et analyser le code dans VS Code ou Notepad++. 5) Documenter les fonctions importantes. Ce workflow est légal pour l'apprentissage et l'analyse de sécurité, mais pas pour la triche ou le contournement de protections.",
+        tools: ["saveinstance()", "Decompiler.com", "BetterDecompiler"]
+      },
+      {
+        id: "legal", name: "Légalité et éthique", icon: "⚖️", wiki: "Computer_Fraud_and_Abuse_Act",
+        desc: "Le reverse engineering est légal dans de nombreux pays pour des fins de recherche, d'interopérabilité et de sécurité. Cependant, contourner des protections techniques (DRM, anti-cheat) est illégal dans la plupart des juridictions. En France, l'article L.335-3-1 du Code de la propriété intellectuelle interdit la suppression de mesures techniques de protection. Aux États-Unis, le DMCA (Digital Millennium Copyright Act) interdit le contournement de DRM. Il est essentiel de pratiquer le RE dans un cadre légal et éthique : analyse de ses propres logiciels, recherche académique, tests de sécurité autorisés.",
+        tools: ["Cadre légal", "Éthique", "Recherche"]
+      }
+    ]
+  },
+  cheat: {
+    title: "🏴‍☠️ Zone Cheat & Switch Games",
+    desc: "Jeux Switch (NSP/XCI) avec liens share.zip directs. Packs de modding et archives volumineuses.",
+    theme: "cheat",
+    items: [
+      {
+        id: "cheat-pokemon-za", name: "Pokémon Legends: Z-A", icon: "🌟", wiki: "Pokémon_Legends:_Z-A",
+        desc: "RPG d'action de Game Freak sur Switch. Fichier NSP complet avec DLCs, taille 4.06 GB, version v2.0.2.",
+        tools: ["NSP", "share.zip", "4.06 GB"],
+        links: [
+          { label: "Télécharger sur share.zip", url: "https://share.zip/file/ab6e3aaf-1f3b-4181-97a1-046f660ded03", icon: "⬇️", style: "sharezip" }
+        ]
+      },
+      {
+        id: "cheat-mariokart8", name: "Mario Kart 8 Deluxe", icon: "🏎️", wiki: "Mario_Kart_8_Deluxe",
+        desc: "Course arcade de Nintendo avec tous les DLC. Fichier NSP, taille 11.3 GB, version v4.0.1.",
+        tools: ["NSP", "share.zip", "11.3 GB"],
+        links: [
+          { label: "Télécharger sur share.zip", url: "https://share.zip/file/23bb958c-5caf-45e4-bfc5-59cb801479ce", icon: "⬇️", style: "sharezip" }
+        ]
+      },
+      {
+        id: "cheat-zelda-botw", name: "Zelda: Breath of the Wild", icon: "🗡️", wiki: "The_Legend_of_Zelda:_Breath_of_the_Wild",
+        desc: "Aventure open-world légendaire de Nintendo. Fichier NSP, taille 13.4 GB, version v1.9.0.",
+        tools: ["NSP", "share.zip", "13.4 GB"],
+        links: [
+          { label: "Télécharger sur share.zip", url: "https://share.zip/file/c983a6b9-ed40-44bb-951a-e9c8e7ec1c81", icon: "⬇️", style: "sharezip" }
+        ]
+      },
+      {
+        id: "cheat-zelda-totk", name: "Zelda: Tears of the Kingdom", icon: "🌌", wiki: "The_Legend_of_Zelda:_Tears_of_the_Kingdom",
+        desc: "Suite directe de BOTW, chef-d'œuvre de Nintendo. Fichier XCI, taille 16.3 GB, version v1.4.3.",
+        tools: ["XCI", "share.zip", "16.3 GB"],
+        links: [
+          { label: "Télécharger sur share.zip", url: "https://share.zip/file/ebbc1a8f-4a04-4d78-8ea4-48601eaea4ad", icon: "⬇️", style: "sharezip" }
+        ]
+      },
+      {
+        id: "cheat-mario-odyssey", name: "Super Mario Odyssey", icon: "🍄", wiki: "Super_Mario_Odyssey",
+        desc: "Plateforme 3D culte de Mario. Fichier NSP, taille 5.22 GB, version v1.4.1.",
+        tools: ["NSP", "share.zip", "5.22 GB"],
+        links: [
+          { label: "Télécharger sur share.zip", url: "https://share.zip/file/31cd75a0-f191-4e3e-a0fc-6330f0842afa", icon: "⬇️", style: "sharezip" }
+        ]
+      },
+      {
+        id: "cheat-smash", name: "Super Smash Bros Ultimate", icon: "🥊", wiki: "Super_Smash_Bros._Ultimate",
+        desc: "Jeu de combat crossover de Nintendo. Fichier NSP, taille 17.3 GB, version v13.0.5.",
+        tools: ["NSP", "share.zip", "17.3 GB"],
+        links: [
+          { label: "Télécharger sur share.zip", url: "https://share.zip/file/e3520718-d505-4e8d-9e13-eabbab4417db", icon: "⬇️", style: "sharezip" }
+        ]
+      },
+      {
+        id: "cheat-pokemon-scarlet", name: "Pokémon Scarlet", icon: "🔴", wiki: "Pokémon_Scarlet_and_Violet",
+        desc: "Opus principal de la 9ᵉ génération Pokémon. Fichier XCI, taille 6.63 GB, version v4.0.0.",
+        tools: ["XCI", "share.zip", "6.63 GB"],
+        links: [
+          { label: "Télécharger sur share.zip", url: "https://share.zip/file/20855bdd-afa5-4380-9887-a8235d03758d", icon: "⬇️", style: "sharezip" }
+        ]
+      },
+      {
+        id: "cheat-fortnite", name: "Fortnite", icon: "🌀", wiki: "Fortnite",
+        desc: "Battle royale d'Epic Games. Packs de modding (> 1 Go) hébergés sur Mega.",
+        tools: ["Mega", "Unreal Engine"],
+        links: [
+          { label: "Accéder au dossier Mega", url: "https://mega.nz/folder/SsIkWbBR#6lRkIDCfleuqEzRMYQY2uA", icon: "📥", style: "mega" }
+        ]
+      },
+      {
+        id: "cheat-minecraft", name: "Minecraft", icon: "🧱", wiki: "Minecraft",
+        desc: "Bac à sable de Mojang. Mods et clients personnalisés. Communauté sur Discord et fichiers sur Mega.",
+        tools: ["Java", "Bedrock", "Forge"],
+        links: [
+          { label: "Accéder au dossier Mega", url: "https://mega.nz/folder/ilpDhYoa#KW3kO79UW1g9ealQ5wY7bg", icon: "📥", style: "mega" },
+          { label: "Rejoindre la communauté Discord", url: "https://discord.gg/euXbYbuDzq", icon: "💬", style: "discord" }
+        ]
+      },
+      {
+        id: "cheat-theforest", name: "The Forest", icon: "🌲", wiki: "The_Forest",
+        desc: "Survie et horreur en monde ouvert. Archives Mega (> 1 Go).",
+        tools: ["Mega", "Unity"],
+        links: [
+          { label: "Accéder au dossier Mega", url: "https://mega.nz/folder/H0JUxDDb#2yurAlAoz-10Vyn1A7a1dg", icon: "📥", style: "mega" }
+        ]
+      },
+      {
+        id: "cheat-brawlstars", name: "Brawl Stars", icon: "⭐", wiki: "Brawl_Stars",
+        desc: "Arène de bataille mobile de Supercell. Canaux Telegram pour datamines et mods.",
+        tools: ["Supercell", "APK", "Telegram"],
+        links: [
+          { label: "Telegram — Brawl Stars Datamines", url: "https://t.me/bsdatamines", icon: "✈️", style: "telegram" },
+          { label: "Telegram — JZ Brawl", url: "https://t.me/jzbrawl", icon: "✈️", style: "telegram" }
+        ]
+      }
+    ]
+  },
+  "zone-red": {
+    title: "🔴 Zone Rouge — IOS / Modding Rayan",
+    desc: "Code source HTML, scripts Lua, injection DLL et cheats (Fortnite 2017-2022, V-Bucks, serveurs).",
+    theme: "red",
+    items: [
+      {
+        id: "red-html-struct", name: "Structure HTML Brute", icon: "📄", wiki: "HTML",
+        desc: "Espace dédié à l'analyse et à la modification directe du code source de l'interface web. Permet d'injecter des éléments, de restructurer le layout CSS et d'optimiser le rendu mobile.",
+        tools: ["HTML5", "CSS3", "DOM"],
+        tutorial: `# ===== STRUCTURE HTML BRUTE =====
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Mon Studio Web</title>
+</head>
+<body>
+  <!-- Zone d'injection dynamique -->
+  <div id="app"></div>
+</body>
+</html>
+
+# ===== MODIFICATION DU DOM =====
+document.getElementById('app').innerHTML = '<h1>Hello</h1>';
+# ===== FIN =====`
+      },
+      {
+        id: "red-lua-cheats", name: "Scripts Lua & Cheats", icon: "🎮", wiki: "Lua_(programming_language)",
+        desc: "Scripts Lua, injection DLL et cheats dans les jeux en ligne : comment ça fonctionnait à l'époque de Fortnite (2017-2022), pourquoi ça ne marche plus aujourd'hui, et pourquoi on ne peut pas se donner des V-Bucks ni manipuler les serveurs.",
+        tools: ["Lua", "DLL Injection", "Fortnite", "Anti-Cheat"],
+        tutorial: `# ===== SCRIPTS LUA, INJECTION DLL & CHEATS =====
+
+## 1. COMMENT FONCTIONNE UN SCRIPT LUA
+
+Un script Lua est un fichier texte (.lua) exécuté par un interpréteur Lua
+intégré au jeu. Il ne touche PAS directement à la mémoire du jeu : il utilise
+une API exposée par le moteur.
+
+Exemple basique :
+  -- Script Lua simple
+  local player = game.Players.LocalPlayer
+  local character = player.Character
+  local humanoid = character:FindFirstChild("Humanoid")
+  humanoid.Health = 0  -- tue le joueur
+
+Le jeu expose des fonctions (API) que le script peut appeler. Le script
+n'a accès qu'à ce que l'API autorise. C'est un environnement sandboxé.
+
+## 2. INJECTION DLL (C++ / Windows)
+
+L'injection DLL consiste à forcer un processus cible (le jeu) à charger une
+DLL qu'on a écrite. La DLL s'exécute DANS le processus du jeu et a donc
+accès à toute sa mémoire.
+
+Étapes typiques :
+  1. Ouvrir le processus du jeu (OpenProcess).
+  2. Allouer de la mémoire (VirtualAllocEx).
+  3. Écrire le chemin de la DLL (WriteProcessMemory).
+  4. Créer un thread distant (CreateRemoteThread) sur LoadLibraryA.
+  5. La DLL est chargée et son DllMain s'exécute.
+
+Techniques : CreateRemoteThread, SetWindowsHookEx, Manual Mapping,
+Process Hollowing, Reflective DLL Injection.
+
+## 3. CHEATS FORTNITE 2017-2022
+
+En 2017-2022, Fortnite (Unreal Engine 4) était massivement ciblé :
+  - Aimbot : visée automatique sur la tête.
+  - Wallhack : voir à travers les murs (ESP).
+  - Fly / Speed : voler ou courir plus vite.
+  - No Recoil : supprimer le recul des armes.
+  - Instant Build : construire instantanément.
+
+Ces cheats étaient possibles car :
+  - L'anti-cheat BattlEye / EAC était contournable.
+  - Le client faisait confiance à certaines données locales.
+  - Les DLL injectées pouvaient hooker les fonctions du moteur.
+
+## 4. POURQUOI CE N'EST PLUS POSSIBLE AUJOURD'HUI
+
+Epic Games a énormément renforcé la sécurité :
+  - Anti-cheat kernel-level (BattlEye + EAC) qui détecte les DLL injectées.
+  - Chiffrement mémoire et obfuscation du moteur.
+  - Validation serveur-authoritative : le serveur ne fait plus confiance au client.
+  - Bans HWID (hardware ID) et ban waves massives.
+  - Poursuites judiciaires contre les vendeurs de cheats.
+
+Résultat : la majorité des cheats publics sont détectés en quelques heures.
+
+## 5. POURQUOI ON NE PEUT PAS SE DONNER DES V-BUCKS
+
+Les V-Bucks sont stockés sur les serveurs d'Epic Games, PAS sur ton appareil.
+Quand tu achètes des V-Bucks, c'est une transaction serveur → serveur avec
+le payment provider. Modifier ton client local ne change RIEN au solde réel.
+
+Tenter de :
+  - Modifier la mémoire locale → le serveur ignore, ton solde reste 0.
+  - Intercepter la requête d'achat → signature cryptographique invalide.
+  - Rejouer une requête → nonce + timestamp + signature TLS.
+
+Toute tentative est loggée côté serveur et entraîne un ban définitif.
+
+## 6. POURQUOI ON NE PEUT PAS MANIPULER LES SERVEURS
+
+Les serveurs de jeux en ligne sont hébergés chez Epic / AWS / Azure, avec :
+  - Authentification par token JWT signé.
+  - Chiffrement TLS 1.3 + certificate pinning.
+  - Rate limiting et détection d'anomalies.
+  - Logs immuables et monitoring 24/7.
+
+Un particulier ne peut pas "hacker" les serveurs de Fortnite sans :
+  - Une faille 0-day critique (rarissime et très précieuse).
+  - Des ressources étatiques (APT).
+  - Une autorisation légale (bug bounty, pentest).
+
+## 7. CE QUI EST LÉGAL ET ÉTHIQUE
+
+  - Analyser des jeux OFFLINE (émulateurs, ROMs personnelles).
+  - Reverse engineer SES PROPRES logiciels.
+  - Participer à des bug bounties (Epic en a un).
+  - Apprendre Lua / C++ / reverse engineering sur des jeux sandbox.
+  - Développer des mods pour des jeux solo (Skyrim, Minecraft solo).
+
+## 8. RÉSUMÉ
+
+  Lua         → sandboxé, n'a accès qu'à l'API exposée par le jeu.
+  DLL Inject  → accès total au processus, mais détecté par anti-cheat.
+  V-Bucks     → stockés côté serveur, impossible à modifier localement.
+  Serveurs    → protégés par TLS, signatures, monitoring.
+  Cheats      → possibles techniquement, illégaux et bannis.
+
+# ===== FIN TUTORIEL LUA & CHEATS =====`
+      }
+    ]
+  },
+  "zone-purple": {
+    title: "🟣 Zone Violette — Mods, APK & Binaires",
+    desc: "Modification de paquets APK, analyse d'exécutables Windows et outillage de modding.",
+    theme: "purple",
+    items: [
+      {
+        id: "purple-apk", name: "Fichiers APK & Smali", icon: "📦", wiki: "Android_Package",
+        desc: "Analyse et décompilation de packages Android (.apk). Modification des manifests, injection de scripts smali et signature de paquets modifiés.",
+        tools: ["Apktool", "JADX", "apksigner"],
+        tutorial: `# ===== MANIPULATION APK & SIGNATURE =====
+# 1. Décompiler l'APK
+apktool d application.apk
+
+# 2. Recompiler après modification
+apktool b application -out modded.apk
+
+# 3. Générer une clé de signature
+keytool -genkey -v -keystore my-release-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias my-alias
+
+# 4. Signer l'APK final
+apksigner sign --ks my-release-key.jks modded.apk
+# ===== FIN =====`
+      },
+      {
+        id: "purple-exe", name: "Binaires Windows (.exe / .dll)", icon: "💻", wiki: "Portable_Executable",
+        desc: "Analyse de structures PE (Portable Executable) pour les exécutables Windows et les bibliothèques dynamiques (.dll). Utilisation de désassembleurs et patchs de code natif.",
+        tools: ["PEview", "Ghidra", "x64dbg"]
+      }
+    ]
+  },
+  termux: {
+    title: "📱 Termux (Android)",
+    desc: "Outils de reverse engineering sur Android",
+    items: [
+      {
+        id: "termux-radare2", name: "Radare2", icon: "🔧", wiki: "Radare2",
+        desc: "Radare2 est une suite d'outils open-source en ligne de commande pour l'analyse de binaires. Il fonctionne sur Termux sans proot, ce qui en fait l'outil idéal pour analyser rapidement un fichier .so sur Android. Radare2 offre le désassemblage, le débogage, l'analyse de flux de contrôle et bien plus. Il supporte de nombreuses architectures (ARM, ARM64, x86, x64, MIPS) et de nombreux formats (ELF, PE, Mach-O, DEX, etc.).",
+        tools: ["radare2", "rabin2", "radiff2"],
+        tutorial: `# ===== INSTALLATION DE RADARE2 SUR TERMUX =====
+# Radare2 est disponible directement dans les dépôts Termux
+
+# 1. Mise à jour des paquets
+pkg update && pkg upgrade -y
+
+# 2. Installation de Radare2
+pkg install radare2 -y
+
+# 3. Vérification
+r2 -v
+
+# 4. Analyser un fichier .so
+r2 libtarget.so
+
+# 5. Commandes de base
+# aaa          → analyse complète
+# afl          → liste toutes les fonctions
+# pdf @ main   → décompile la fonction main
+# s sym.main   → se déplacer vers main
+# V            → mode visuel
+# q            → quitter
+
+# 6. Exemple concret avec analyse automatique
+r2 -A libanti-cheat.so
+
+# 7. Extraire les chaînes
+rabin2 -z libtarget.so | head -50
+
+# 8. Désassembler une fonction
+r2 -A libtarget.so
+[0x00000000]> s sym.Java_com_example_init
+[0x00000000]> pdf
+
+# 9. Sauvegarder le projet
+r2 -A libtarget.so
+[0x00000000]> Ps projet.r2
+
+# 10. Installer r2ghidra (décompilation)
+r2pm update
+r2pm install r2ghidra
+# Puis : pdg @ main  → pseudo-code Ghidra
+
+# ===== FIN TUTORIEL RADARE2 =====`
+      },
+      {
+        id: "termux-ghidra", name: "Ghidra (proot)", icon: "🔬", wiki: "Ghidra",
+        desc: "Ghidra est l'outil de reverse engineering gratuit développé par la NSA (National Security Agency) et publié en open-source en 2019. Il nécessite Java et une interface graphique. Sur Termux, on l'installe via proot-distro Ubuntu, ce qui permet d'avoir un environnement Linux complet sur Android. Ghidra est particulièrement performant pour décompiler du code C++ compilé, avec une fonction de décompilation en pseudo-code de très haute qualité.",
+        tools: ["proot-distro", "Ghidra", "Java JDK"],
+        tutorial: `# ===== INSTALLATION DE GHIDRA SUR TERMUX =====
+
+# 1. Installer proot-distro
+pkg update && pkg upgrade -y
+pkg install proot-distro -y
+
+# 2. Installer Ubuntu
+proot-distro install ubuntu
+
+# 3. Se connecter à Ubuntu
+proot-distro login ubuntu
+
+# --- DANS UBUNTU ---
+
+# 4. Mettre à jour
+apt update && apt upgrade -y
+
+# 5. Installer Java 17 (obligatoire pour Ghidra)
+apt install openjdk-17-jdk wget unzip -y
+java -version
+
+# 6. Télécharger Ghidra 11.0.3
+cd /opt
+wget https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_11.0.3_build/ghidra_11.0.3_PUBLIC_20240410.zip
+
+# 7. Extraire
+unzip ghidra_11.0.3_PUBLIC_20240410.zip
+mv ghidra_11.0.3_PUBLIC ghidra
+
+# 8. Lancer Ghidra en mode headless (sans GUI)
+./ghidra/support/analyzeHeadless /root/projets MonProjet -import libtarget.so
+
+# 9. Créer un script Ghidra (MonScript.java)
+cat > MonScript.java << 'EOF'
+import ghidra.app.script.GhidraScript;
+import ghidra.program.model.listing.*;
+public class MonScript extends GhidraScript {
+    public void run() throws Exception {
+        FunctionManager fm = currentProgram.getFunctionManager();
+        for (Function f : fm.getFunctions(true)) {
+            println("Fonction: " + f.getName());
+        }
+    }
+}
+EOF
+
+# 10. Lancer avec le script
+./ghidra/support/analyzeHeadless /root/projets MonProjet -import libtarget.so -postScript MonScript.java
+
+# 11. Se déconnecter
+exit
+
+# ===== FIN TUTORIEL GHIDRA =====`
+      },
+      {
+        id: "termux-apktool", name: "Apktool", icon: "📦", wiki: "Apktool",
+        desc: "Apktool est un outil qui décompile les APK Android en ressources lisibles (XML, smali). C'est la première étape avant de chercher les fichiers .so dans l'APK. Apktool permet de modifier les ressources, le code smali, puis de recompiler l'APK. Le code smali est l'assembleur Dalvik, l'équivalent du bytecode Java mais pour Android. Cette étape est essentielle pour comprendre la logique de l'application avant d'attaquer les bibliothèques natives .so.",
+        tools: ["apktool", "keytool", "apksigner"],
+        tutorial: `# ===== INSTALLATION D'APKTOOL SUR TERMUX =====
+
+# 1. Installer les dépendances
+pkg update && pkg upgrade -y
+pkg install wget openjdk-17 -y
+
+# 2. Télécharger Apktool
+wget https://github.com/Termux-Apktool/apktool/releases/download/v2.3.4/apktool_2.3.4_all.deb
+
+# 3. Installer le .deb
+dpkg -i apktool_2.3.4_all.deb
+
+# 4. Vérifier
+apktool --version
+
+# 5. Décompiler un APK
+apktool d monapp.apk
+# Crée un dossier monapp/ avec :
+# - AndroidManifest.xml
+# - res/ (ressources)
+# - smali/ (code assembleur Dalvik)
+# - lib/ (bibliothèques .so natives)
+
+# 6. Chercher les fichiers .so
+find monapp/lib -name "*.so"
+# Exemple : monapp/lib/arm64-v8a/libanti-cheat.so
+
+# 7. Modifier le code smali puis recompiler
+apktool b monapp -o monapp_modifie.apk
+
+# 8. Signer l'APK modifié
+pkg install apksigner -y
+keytool -genkey -v -keystore ma-cle.keystore -alias mon-alias -keyalg RSA -keysize 2048 -validity 10000
+apksigner sign --ks ma-cle.keystore monapp_modifie.apk
+
+# 9. Installer
+adb install monapp_modifie.apk
+
+# ===== FIN TUTORIEL APKTOOL =====`
+      },
+      {
+        id: "termux-jadx", name: "JADX", icon: "☕", wiki: "JADX",
+        desc: "JADX est un décompilateur DEX vers Java. Il convertit les fichiers DEX (bytecode Android) en code Java lisible, ce qui est bien plus confortable que le smali. JADX est indispensable pour comprendre la logique de l'application avant d'attaquer les .so natifs. Il supporte la décompilation de ressources, l'export de projet Gradle, et peut être utilisé en ligne de commande ou via une interface graphique (jadx-gui).",
+        tools: ["JADX", "Java", "proot-distro"],
+        tutorial: `# ===== INSTALLATION DE JADX SUR TERMUX =====
+
+# 1. Installer proot-distro
+pkg install proot-distro -y
+proot-distro install ubuntu
+proot-distro login ubuntu
+
+# --- DANS UBUNTU ---
+
+# 2. Mettre à jour
+apt update && apt upgrade -y
+
+# 3. Installer Java et unzip
+apt install openjdk-17-jdk unzip wget -y
+
+# 4. Télécharger JADX
+cd /opt
+wget https://github.com/skylot/jadx/releases/download/v1.5.0/jadx-1.5.0.zip
+unzip jadx-1.5.0.zip -d jadx
+cd jadx/bin
+
+# 5. Lancer JADX en ligne de commande
+./jadx monapp.apk
+# Crée un dossier avec le code Java décompilé
+
+# 6. JADX GUI (si supporté par proot)
+./jadx-gui monapp.apk
+
+# 7. Extraire uniquement le code Java
+./jadx -d output_java monapp.apk
+
+# 8. Analyser une classe spécifique
+./jadx --single-class com.example.MainActivity monapp.apk
+
+# 9. Chercher dans le code décompilé
+grep -r "anti-cheat" output_java/ -i
+grep -r "ssl_pinning" output_java/ -i
+grep -r "nativeLib" output_java/ -i
+
+# 10. Se déconnecter
+exit
+
+# ===== FIN TUTORIEL JADX =====`
+      }
+    ]
+  },
+  linux: {
+    title: "🐧 Linux & Outils IA de Décompilation",
+    desc: "Outils pour analyser binaires, OpenBin.ai et LLM4Decompile",
+    items: [
+      {
+        id: "linux-ghidra", name: "Ghidra (Linux)", icon: "🔬", wiki: "Ghidra",
+        desc: "Ghidra est l'outil de référence pour décompiler du C++ compilé sous Linux. Il supporte ELF, PE, Mach-O et de nombreux autres formats. Son décompilateur intégré produit du pseudo-code C très lisible, ce qui facilite énormément l'analyse. Ghidra peut être utilisé en mode graphique (ghidraRun) ou en mode headless (analyzeHeadless) pour l'automatisation. C'est un outil gratuit et open-source, ce qui en fait une alternative sérieuse à IDA Pro.",
+        tools: ["Ghidra", "Java 17", "analyzeHeadless"],
+        tutorial: `# ===== INSTALLATION DE GHIDRA SUR LINUX =====
+
+# 1. Installer Java 17
+sudo apt update
+sudo apt install openjdk-17-jdk -y
+java -version
+
+# 2. Télécharger Ghidra
+cd /opt
+sudo wget https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_11.0.3_build/ghidra_11.0.3_PUBLIC_20240410.zip
+
+# 3. Extraire
+sudo unzip ghidra_11.0.3_PUBLIC_20240410.zip
+sudo mv ghidra_11.0.3_PUBLIC ghidra
+sudo chmod -R 755 /opt/ghidra
+
+# 4. Lancer Ghidra (GUI)
+cd /opt/ghidra
+./ghidraRun
+
+# 5. Lancer Ghidra Headless (sans GUI)
+/opt/ghidra/support/analyzeHeadless /home/user/projets MonProjet -import libtarget.so
+
+# 6. Analyser un binaire Windows (DLL, EXE)
+/opt/ghidra/support/analyzeHeadless /home/user/projets WinProjet -import monprogramme.exe
+
+# 7. Analyser un binaire macOS (Mach-O)
+/opt/ghidra/support/analyzeHeadless /home/user/projets MacProjet -import monapp.dylib
+
+# 8. Exécuter un script Java après analyse
+/opt/ghidra/support/analyzeHeadless /home/user/projets MonProjet -import libtarget.so -postScript MonScript.java
+
+# 9. Exporter le décompilé
+# Dans Ghidra GUI : File → Export → C/C++
+
+# 10. Script Ghidra pour lister les fonctions
+cat > MonScript.java << 'EOF'
+import ghidra.app.script.GhidraScript;
+import ghidra.program.model.listing.*;
+public class MonScript extends GhidraScript {
+    public void run() throws Exception {
+        FunctionManager fm = currentProgram.getFunctionManager();
+        for (Function f : fm.getFunctions(true)) {
+            println("Fonction: " + f.getName());
+        }
+    }
+}
+EOF
+
+# ===== FIN TUTORIEL GHIDRA LINUX =====`
+      },
+      {
+        id: "linux-radare2", name: "Radare2 (Linux)", icon: "🔧", wiki: "Radare2",
+        desc: "Radare2 est un framework complet d'analyse de binaires en ligne de commande. Il fonctionne sur Linux, macOS et Windows. C'est un outil extrêmement puissant pour l'automatisation et les scripts, avec plus de 100 commandes disponibles. Radare2 peut désassembler, déboguer, analyser le flux de contrôle, extraire des chaînes, et bien plus. Son architecture modulaire permet d'ajouter des plugins comme r2ghidra pour la décompilation.",
+        tools: ["radare2", "r2pm", "r2ghidra"],
+        tutorial: `# ===== INSTALLATION DE RADARE2 SUR LINUX =====
+
+# 1. Installation via apt
+sudo apt update
+sudo apt install radare2 -y
+
+# 2. Installation via git (dernière version)
+git clone https://github.com/radareorg/radare2.git
+cd radare2
+sys/install.sh
+
+# 3. Vérifier
+r2 -v
+
+# 4. Analyser un binaire
+r2 -A /chemin/vers/binaire
+
+# 5. Commandes essentielles
+# aaa          → analyse complète
+# afl          → liste fonctions
+# pdf @ main   → décompile main
+# iz           → chaînes de caractères
+# ii           → imports
+# ie           → entrypoints
+# is           → symboles
+# s sym.xxx    → se déplacer
+# V            → mode visuel
+# q            → quitter
+
+# 6. Analyser un .so Android
+r2 -A libtarget.so
+[0x00000000]> afl
+[0x00000000]> s sym.Java_com_example_init
+[0x00000000]> pdf
+
+# 7. Extraire les chaînes
+rabin2 -z libtarget.so > strings.txt
+
+# 8. Comparer deux binaires
+radiff2 -c binaire1.so binaire2.so
+
+# 9. Scripts Radare2
+cat > analyse.r2 << 'EOF'
+aaa
+afl > fonctions.txt
+iz > strings.txt
+ii > imports.txt
+pdf @ main > main.asm
+EOF
+r2 -i analyse.r2 libtarget.so
+
+# 10. Installer r2ghidra
+r2pm update
+r2pm install r2ghidra
+# Puis : pdg @ main
+
+# ===== FIN TUTORIEL RADARE2 =====`
+      },
+      {
+        id: "linux-binutils", name: "Binutils", icon: "🛠️", wiki: "GNU_Binutils",
+        desc: "Binutils est un ensemble d'outils GNU pour manipuler les binaires ELF. readelf affiche les en-têtes, objdump désassemble, nm liste les symboles. C'est l'outil de base pour toute analyse de binaire sur Linux. Avant de passer à Ghidra ou Radare2, il est recommandé de commencer par Binutils pour avoir une vue d'ensemble du binaire : architecture, sections, symboles, dépendances. Ces outils sont extrêmement rapides et légers.",
+        tools: ["readelf", "objdump", "nm", "strings", "file"],
+        tutorial: `# ===== UTILISATION DE BINUTILS =====
+
+# 1. Installation
+sudo apt install binutils -y
+
+# 2. Identifier un fichier
+file libtarget.so
+# Sortie : ELF 64-bit LSB shared object, ARM aarch64...
+
+# 3. Lire les en-têtes ELF
+readelf -h libtarget.so
+# -h : header
+# -l : program headers
+# -S : section headers
+# -s : symboles
+# -d : sections dynamiques
+# -r : relocations
+
+# 4. Désassembler
+objdump -d libtarget.so > disasm.txt
+# -d : désassemble les sections exécutables
+# -D : désassemble tout
+# -S : avec le code source si dispo
+
+# 5. Lister les symboles
+nm -D libtarget.so
+# -D : symboles dynamiques (pour .so)
+# -C : demangle les noms C++
+
+# 6. Extraire les chaînes de caractères
+strings libtarget.so | head -100
+# -n 6 : chaînes d'au moins 6 caractères
+
+# 7. Chercher une fonction spécifique
+nm -D libtarget.so | grep -i "java_"
+nm -D libtarget.so | grep -i "anti"
+
+# 8. Analyser les dépendances
+ldd libtarget.so
+# Liste les bibliothèques requises
+
+# 9. Extraire les sections
+objcopy -O binary --only-section=.text libtarget.so text.bin
+
+# 10. Script d'analyse complet
+cat > analyse.sh << 'EOF'
+#!/bin/bash
+BINAIRE=$1
+echo "=== FILE ===" > analyse.txt
+file $BINAIRE >> analyse.txt
+echo "=== HEADERS ===" >> analyse.txt
+readelf -h $BINAIRE >> analyse.txt
+echo "=== SYMBOLES ===" >> analyse.txt
+nm -D $BINAIRE >> analyse.txt
+echo "=== CHAINES ===" >> analyse.txt
+strings $BINAIRE >> analyse.txt
+echo "Analyse terminée : analyse.txt"
+EOF
+chmod +x analyse.sh
+./analyse.sh libtarget.so
+
+# ===== FIN TUTORIEL BINUTILS =====`
+      },
+      {
+        id: "ai-openbin", name: "OpenBin.ai", icon: "🌐", wiki: "Cloud_computing",
+        desc: "OpenBin.ai est une plateforme web gratuite pour l'analyse de binaires. Elle supporte ELF/PE/Mach-O (via Ghidra), APK (via JADX), npm/PyPI et PowerShell. Tu utilises ta propre clé LLM (BYO key). C'est idéal pour une analyse rapide sans installation. OpenBin.ai combine plusieurs outils de RE dans une interface web unifiée, avec l'IA qui vient enrichir l'analyse.",
+        tools: ["Web", "Ghidra", "JADX", "LLM"],
+        tutorial: `# ===== UTILISATION D'OPENBIN.AI =====
+
+# 1. Ouvrir le site
+# https://openbin.ai
+
+# 2. Créer un compte (gratuit)
+
+# 3. Configurer une clé LLM (BYO)
+# - Claude : https://console.anthropic.com
+# - OpenAI : https://platform.openai.com
+
+# 4. Uploader un binaire
+# - Cliquer sur "Upload"
+# - Sélectionner libtarget.so ou monapp.apk
+# - Attendre l'analyse
+
+# 5. Explorer les résultats
+# - Functions : liste des fonctions
+# - Strings : chaînes de caractères
+# - Imports : bibliothèques importées
+# - AI Analysis : résumé généré par l'IA
+
+# 6. Poser des questions à l'IA
+# "Explique la fonction main"
+# "Trouve les fonctions liées à l'anti-cheat"
+
+# 7. Exporter les résultats
+# - JSON
+# - C/C++ décompilé
+# - Markdown (rapport)
+
+# 8. Limites
+# - Ne pas uploader de code propriétaire
+# - Vérifier les conditions d'utilisation
+
+# 9. Alternative locale
+git clone https://github.com/openbin-ai/openbin.git
+cd openbin
+pip install -r requirements.txt
+python3 app.py
+
+# ===== FIN TUTORIEL OPENBIN =====`
+      },
+      {
+        id: "ai-llm4decompile", name: "LLM4Decompile", icon: "🧠", wiki: "Large_language_model",
+        desc: "LLM4Decompile est un modèle fine-tuné spécialisé dans la décompilation. Il est disponible en 1.3B à 33B paramètres. C'est un modèle self-hosted qui nécessite un GPU. Il est idéal pour les projets sensibles où les données ne doivent pas quitter ton infrastructure. Le modèle a été entraîné sur des millions de paires (code compilé, code source) pour apprendre à reconstruire du code C lisible à partir d'assembleur.",
+        tools: ["Python", "PyTorch", "GPU", "LLM"],
+        tutorial: `# ===== INSTALLATION DE LLM4DECOMPILE =====
+
+# 1. Prérequis
+# - Python 3.10+
+# - GPU NVIDIA (8GB+ VRAM recommandé)
+# - CUDA 11.8+
+
+# 2. Cloner le dépôt
+git clone https://github.com/albertan017/LLM4Decompile.git
+cd LLM4Decompile
+
+# 3. Environnement virtuel
+python3 -m venv venv
+source venv/bin/activate
+
+# 4. Installer les dépendances
+pip install -r requirements.txt
+
+# 5. Télécharger un modèle
+# Options : 1.3B, 6.7B, 33B
+python3 download_model.py --model llm4decompile-6.7b
+
+# 6. Décompiler un binaire
+python3 decompile.py --model llm4decompile-6.7b --input libtarget.so
+
+# 7. Analyser un .so Android
+python3 decompile.py --model llm4decompile-6.7b --input libanti-cheat.so --arch arm64
+
+# 8. Options
+# --arch : architecture (x86, x64, arm, arm64)
+# --output : fichier de sortie
+# --batch : traiter plusieurs binaires
+# --gpu : utiliser le GPU
+
+# 9. Exemple avec sortie
+python3 decompile.py --model llm4decompile-6.7b --input libtarget.so --output decompiled.c
+
+# 10. Utiliser via API
+from llm4decompile import decompile
+code = decompile("libtarget.so", model="llm4decompile-6.7b")
+print(code)
+
+# ===== FIN TUTORIEL LLM4DECOMPILE =====`
+      }
+    ]
+  },
+  ai: {
+    title: "🤖 IA & Reverse Engineering",
+    desc: "Outils IA modernes pour accélérer la décompilation",
+    items: [
+      {
+        id: "ai-rea", name: "REA", icon: "🔄", wiki: "Model_Context_Protocol",
+        desc: "REA (Reverse Engineer Anything) est un serveur MCP open-source qui connecte un agent IA (Claude, GPT, etc.) à Ghidra, Hopper ou IDA. L'agent décompile, trace, renomme et réécrit le code en boucle. C'est l'outil le plus avancé pour automatiser le RE en 2025-2026. Il utilise le protocole MCP (Model Context Protocol) d'Anthropic pour permettre à l'IA d'interagir avec les outils de RE de manière standardisée.",
+        tools: ["MCP", "Ghidra", "Claude", "IDA"],
+        tutorial: `# ===== INSTALLATION ET UTILISATION DE REA =====
+
+# 1. Prérequis
+# - Python 3.10+
+# - Ghidra ou IDA installé
+# - Une clé API LLM (Claude, GPT)
+
+# 2. Cloner REA
+git clone https://github.com/agentic-ai/rea.git
+cd rea
+
+# 3. Installer les dépendances
+pip install -r requirements.txt
+
+# 4. Configurer l'API
+export ANTHROPIC_API_KEY="sk-ant-..."
+# ou
+export OPENAI_API_KEY="sk-..."
+
+# 5. Lancer le serveur MCP
+python3 server.py --ghidra-path /opt/ghidra
+
+# 6. Utiliser REA avec Claude
+python3 rea.py --target libtarget.so --agent claude
+
+# 7. L'agent va automatiquement :
+# - Analyser le binaire
+# - Identifier les fonctions importantes
+# - Renommer les variables
+# - Générer des résumés
+# - Chercher des vulnérabilités
+
+# 8. Exemple de session
+# $ python3 rea.py --target libanti-cheat.so
+# [REA] 245 fonctions détectées
+# [REA] Fonction sub_1234 → check_anticheat
+# [REA] Fonction sub_2345 → validate_ssl_pinning
+# [REA] Vulnérabilité trouvée : buffer overflow
+
+# 9. Sauvegarder les résultats
+python3 rea.py --target libtarget.so --output rapport.json
+
+# ===== FIN TUTORIEL REA =====`
+      },
+      {
+        id: "ai-ghidramcp", name: "GhidraMCP", icon: "🌉", wiki: "Model_Context_Protocol",
+        desc: "GhidraMCP est un bridge MCP gratuit entre Ghidra et n'importe quel client LLM (Claude, GPT, etc.). Il permet le renommage automatique, la summarization et les cross-references automatisés. C'est la solution la plus simple pour connecter Ghidra à une IA. GhidraMCP expose les fonctions de Ghidra via le protocole MCP, ce qui permet à l'IA de les appeler directement sans avoir à écrire de scripts Java complexes.",
+        tools: ["Ghidra", "MCP", "Python", "LLM"],
+        tutorial: `# ===== INSTALLATION DE GHIDRAMCP =====
+
+# 1. Cloner le dépôt
+git clone https://github.com/LaurieWired/GhidraMCP.git
+cd GhidraMCP
+
+# 2. Installer les dépendances
+pip install -r requirements.txt
+
+# 3. Installer le plugin dans Ghidra
+# - Copier le .zip dans le dossier d'extensions Ghidra
+# - Ouvrir Ghidra → File → Install Extensions
+# - Sélectionner GhidraMCP
+# - Redémarrer Ghidra
+
+# 4. Lancer le serveur MCP
+python3 bridge_mcp_ghidra.py
+
+# 5. Connecter un client LLM
+# Claude Desktop : ajouter le serveur MCP
+# VS Code + Claude Dev : configurer le MCP
+
+# 6. Utiliser via Claude
+# "Analyse cette fonction Ghidra"
+# L'IA interroge GhidraMCP pour obtenir le code
+
+# 7. Fonctionnalités
+# - rename_function
+# - get_function
+# - list_functions
+# - cross_references
+
+# 8. Exemple concret
+python3 bridge_mcp_ghidra.py --project MonProjet --program libtarget.so
+
+# 9. Automatiser le renommage
+# L'IA peut renommer 100 fonctions en quelques secondes
+# sub_1234 → check_anticheat
+# sub_2345 → validate_input
+# sub_3456 → decrypt_string
+
+# ===== FIN TUTORIEL GHIDRAMCP =====`
+      },
+      {
+        id: "ai-betterdecompiler", name: "BetterDecompiler", icon: "🎮", wiki: "Roblox",
+        desc: "BetterDecompiler est un outil spécifique Roblox. Son IA ne fait que suggérer des noms de variables (pas de réécriture), donc il y a zéro risque de bug. C'est l'outil idéal pour nettoyer un script Luau décompilé sans casser la logique. Le code Luau est le langage de script utilisé par Roblox, dérivé de Lua 5.1 avec des ajouts de typage progressif et d'optimisations JIT.",
+        tools: ["Luau", "IA", "Roblox"],
+        tutorial: `# ===== UTILISATION DE BETTERDECOMPILER =====
+
+# 1. Prérequis
+# - Un script Luau décompilé
+# - Un client IA (Claude, GPT)
+
+# 2. Récupérer un script décompilé
+# In-game :
+saveinstance()
+# Récupérer le fichier .rbxl
+
+# 3. Décompiler avec Decompiler.com
+# https://decompiler.com
+# Uploader le .rbxl
+# Télécharger le code Luau
+
+# 4. Ouvrir dans BetterDecompiler
+# https://github.com/betterdecompiler/betterdecompiler
+
+# 5. L'IA va suggérer des noms pour :
+# - Les variables locales
+# - Les fonctions
+# - Les paramètres
+
+# 6. Avantages
+# - Ne réécrit PAS le code
+# - Zéro risque de bug
+# - Gain de temps énorme
+
+# 7. Utilisation manuelle avec Claude
+claude "Renomme les variables de ce script Luau"
+
+# 8. Exemple
+# Avant :
+local v1 = game.Players.LocalPlayer
+local v2 = v1.Character
+local v3 = v2:FindFirstChild("Humanoid")
+v3.Health = 0
+
+# Après :
+local player = game.Players.LocalPlayer
+local character = player.Character
+local humanoid = character:FindFirstChild("Humanoid")
+humanoid.Health = 0
+
+# 9. Vérifier le code
+# Toujours relire après renommage
+
+# ===== FIN TUTORIEL BETTERDECOMPILER =====`
+      }
+    ]
+  },
+  ides: {
+    title: "💻 IDEs recommandés",
+    desc: "Claude Code, VS Code, Cursor — outils de travail",
+    items: [
+      {
+        id: "ide-claude", name: "Claude Code", icon: "🤖", wiki: "Claude_(language_model)",
+        desc: "Claude Code est l'IDE en ligne de commande d'Anthropic. Il permet de discuter avec Claude directement dans le terminal, d'analyser du code décompilé, de renommer des variables et de générer des rapports. Claude Code est particulièrement adapté au reverse engineering car il peut lire de gros fichiers et comprendre la structure d'un projet entier. Il utilise le modèle Claude 3.5 Sonnet ou Opus selon les besoins.",
+        tools: ["Node.js", "Claude API"],
+        tutorial: `# ===== INSTALLATION ET UTILISATION DE CLAUDE CODE =====
+
+# 1. Prérequis
+# - Node.js 18+
+# - Compte Anthropic
+
+# 2. Installer Node.js
+sudo apt install nodejs npm -y
+node -v
+
+# 3. Installer Claude Code
+npm install -g @anthropic-ai/claude-code
+
+# 4. Se connecter
+claude login
+
+# 5. Vérifier
+claude --version
+
+# 6. Analyser un projet décompilé
+cd /chemin/vers/code_decompile
+claude
+
+# 7. Exemples de commandes
+# "Analyse ce code C++ décompilé"
+# "Renomme les variables sub_XXX"
+# "Trouve les vulnérabilités"
+# "Génère un rapport Markdown"
+
+# 8. Automatiser
+claude "Liste toutes les fonctions anti-cheat"
+claude "Explique la fonction sub_1234"
+claude "Renomme sub_1234 en check_anticheat"
+
+# 9. Sauvegarder la session
+claude --save session.json
+
+# 10. Intégration avec Ghidra
+# Exporter le code depuis Ghidra
+# Puis l'analyser avec Claude Code
+
+# ===== FIN TUTORIEL CLAUDE CODE =====`
+      },
+      {
+        id: "ide-vscode", name: "VS Code", icon: "💙", wiki: "Visual_Studio_Code",
+        desc: "Visual Studio Code est l'IDE le plus populaire pour le développement. Avec les extensions C/C++, Ghidra et Claude Dev, il devient un outil de reverse engineering puissant. Interface personnalisable et extensions infinies. VS Code supporte nativement de nombreux langages et peut être étendu avec des milliers d'extensions. Pour le RE, les extensions C/C++ (Microsoft), Hex Editor et Claude Dev sont indispensables.",
+        tools: ["VS Code", "C/C++", "Claude Dev"],
+        tutorial: `# ===== INSTALLATION ET CONFIGURATION DE VS CODE =====
+
+# 1. Installer VS Code
+sudo apt install code -y
+# ou télécharger depuis https://code.visualstudio.com
+
+# 2. Extensions essentielles
+code --install-extension ms-vscode.cpptools
+code --install-extension anthropic.claude-dev
+code --install-extension mhutchie.git-graph
+code --install-extension eamodio.gitlens
+
+# 3. Configurer Claude Dev
+# Ctrl+Shift+P → "Claude Dev: Configure"
+# Entrer l'API key Anthropic
+
+# 4. Ouvrir un projet décompilé
+code /chemin/vers/code_decompile
+
+# 5. Utiliser Claude Dev
+# Ctrl+Shift+P → "Claude Dev: New Chat"
+# Demander : "Analyse ce code C++"
+
+# 6. Raccourcis utiles
+# Ctrl+P : ouvrir un fichier
+# Ctrl+Shift+F : chercher dans tout le projet
+# Ctrl+\` : ouvrir le terminal
+# F12 : aller à la définition
+# Shift+F12 : trouver les références
+
+# 7. Extensions recommandées RE
+# - Hex Editor : visualiser les binaires
+# - Ghidra Extension : intégration
+# - Assembly : coloration ASM
+
+# 8. Analyser un fichier .so
+# - Ouvrir avec Hex Editor
+# - Chercher des chaînes
+# - Utiliser Claude Dev pour expliquer
+
+# 9. Workflow complet
+# 1. Ghidra → export C/C++
+# 2. VS Code → ouvrir le dossier
+# 3. Claude Dev → renommer
+# 4. Manuel → réviser
+# 5. Git → versionner
+
+# ===== FIN TUTORIEL VS CODE =====`
+      },
+      {
+        id: "ide-cursor", name: "Cursor", icon: "⚡", wiki: "Cursor_(code_editor)",
+        desc: "Cursor est un IDE basé sur VS Code avec une IA intégrée (GPT-4, Claude). Il permet de discuter avec l'IA directement dans l'éditeur, de générer du code et d'analyser des projets entiers. C'est l'IDE idéal pour le reverse engineering rapide. Cursor dispose de fonctionnalités avancées comme le mode Composer (création de projets entiers), Tab (autocomplétion IA) et un chat contextuel qui comprend tout le projet.",
+        tools: ["Cursor", "GPT-4", "Claude"],
+        tutorial: `# ===== INSTALLATION ET UTILISATION DE CURSOR =====
+
+# 1. Télécharger Cursor
+# https://cursor.sh
+# Disponible pour Linux, macOS, Windows
+
+# 2. Installer sur Linux
+wget https://download.cursor.sh/linux/appImage/x64
+chmod +x x64
+./x64
+
+# 3. Se connecter
+# Créer un compte ou se connecter avec GitHub
+
+# 4. Configurer l'IA
+# Ctrl+, → Choisir GPT-4 ou Claude
+# Entrer l'API key si nécessaire
+
+# 5. Ouvrir un projet décompilé
+# File → Open Folder → /chemin/vers/code_decompile
+
+# 6. Utiliser l'IA
+# Ctrl+K : demander à l'IA de modifier
+# Ctrl+L : ouvrir le chat
+# Ctrl+I : commande inline
+
+# 7. Prompts utiles
+# "Renomme toutes les variables sub_XXX"
+# "Explique cette fonction"
+# "Trouve les vulnérabilités"
+# "Génère un rapport Markdown"
+
+# 8. Fonctionnalités
+# - Tab : autocomplétion IA
+# - Composer : créer un projet
+# - @ : référencer un fichier
+
+# 9. Analyser un .so décompilé
+# Ouvrir le fichier .c
+# Ctrl+L : "Explique ce code"
+# Ctrl+K : "Renomme les variables"
+
+# 10. Workflow RE avec Cursor
+# 1. Ghidra → export C/C++
+# 2. Cursor → ouvrir le dossier
+# 3. IA → renommer + commenter
+# 4. Manuel → réviser
+# 5. Git → versionner
+
+# ===== FIN TUTORIEL CURSOR =====`
+      }
+    ]
+  }
+};
+
+// ============================================================
+// WIKIPÉDIA API
+// ============================================================
+const wikiCache = {};
+
+async function fetchWikipedia(page, lang = "fr") {
+  const key = lang + ":" + page;
+  if (wikiCache[key]) return wikiCache[key];
+  try {
+    const url = `https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(page)}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    const result = {
+      title: data.title || page,
+      extract: data.extract || "Aucun résumé disponible.",
+      url: data.content_urls?.desktop?.page || `https://${lang}.wikipedia.org/wiki/${page}`
+    };
+    wikiCache[key] = result;
+    return result;
+  } catch (e) {
+    return { title: page, extract: "⚠️ Wikipédia inaccessible (vérifie ta connexion).", url: `https://fr.wikipedia.org/wiki/${page}`, error: true };
+  }
+}
+
+// ============================================================
+// STATE
+// ============================================================
+const AppState = { currentCat: "home", searchQuery: "" };
+
+// ============================================================
+// VOILES ET TRANSITIONS
+// ============================================================
+const veilRed = document.getElementById("veilRed");
+const veilPurple = document.getElementById("veilPurple");
+const sweepOverlay = document.getElementById("sweepOverlay");
+
+function updateZoneVeils(catName) {
+  const cat = CATEGORIES[catName];
+  const theme = cat?.theme || null;
+  if (theme === "red") {
+    veilRed.classList.add("active");
+    veilPurple.classList.remove("active");
+  } else if (theme === "purple") {
+    veilPurple.classList.add("active");
+    veilRed.classList.remove("active");
+  } else {
+    veilRed.classList.remove("active");
+    veilPurple.classList.remove("active");
+  }
+}
+
+function triggerSweep(theme) {
+  if (!theme) return;
+  sweepOverlay.classList.remove("fire", "from-left", "from-right");
+  void sweepOverlay.offsetWidth;
+  sweepOverlay.classList.add("fire", theme === "red" ? "from-left" : "from-right");
+  setTimeout(() => {
+    sweepOverlay.classList.remove("fire", "from-left", "from-right");
+  }, 800);
+}
+
+function updatePanelsTheme(theme) {
+  const panelHeader = document.getElementById("panelHeader");
+  const rightPanel = document.getElementById("rightPanel");
+  panelHeader.classList.remove("zone-red-theme", "zone-purple-theme", "cheat-theme");
+  rightPanel.classList.remove("zone-red-theme", "zone-purple-theme", "cheat-theme");
+  if (theme) {
+    panelHeader.classList.add(theme === "cheat" ? "cheat-theme" : theme + "-theme");
+    rightPanel.classList.add(theme === "cheat" ? "cheat-theme" : theme + "-theme");
+  }
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function showCategory(catName) {
+  const cat = CATEGORIES[catName];
+  if (!cat) return;
+  const previousCat = AppState.currentCat;
+  const previousTheme = CATEGORIES[previousCat]?.theme || null;
+  const newTheme = cat.theme || null;
+
+  if (newTheme && newTheme !== previousTheme) {
+    triggerSweep(newTheme);
+  } else if (!newTheme && previousTheme && previousTheme !== "cheat") {
+    triggerSweep(previousTheme);
+  }
+
+  AppState.currentCat = catName;
+  document.querySelectorAll(".nav-btn").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.cat === catName);
+  });
+
+  updateZoneVeils(catName);
+  updatePanelsTheme(newTheme);
+
+  // Titre : innerHTML pour pouvoir afficher "Rayan" en rose
+  document.getElementById("catTitle").innerHTML = cat.title;
+  document.getElementById("catDesc").textContent = cat.desc;
+  renderContent();
+}
+
+// ============================================================
+// RENDU DES CARTES
+// ============================================================
+function renderContent() {
+  const cat = CATEGORIES[AppState.currentCat];
+  let items = cat.items;
+  if (AppState.searchQuery) {
+    items = items.filter(it =>
+      it.name.toLowerCase().includes(AppState.searchQuery) ||
+      it.desc.toLowerCase().includes(AppState.searchQuery)
+    );
+  }
+  const container = document.getElementById("content");
+  container.innerHTML = "";
+
+  if (items.length === 0) {
+    container.innerHTML = `<p style="font-size:12px;color:#888;text-align:center;padding:20px;">Aucun élément.</p>`;
+    return;
+  }
+
+  const grid = document.createElement("div");
+  grid.className = "cards-grid";
+  const theme = cat.theme || null;
+
+  items.forEach(it => {
+    const card = document.createElement("div");
+    card.className = "card" + (theme === "red" ? " card-red" : theme === "purple" ? " card-purple" : theme === "cheat" ? " card-cheat" : "");
+    card.innerHTML = `
+      <div class="card-title">
+        <span>${it.icon}</span>
+        <span class="gold-text">${it.name}</span>
+      </div>
+      <div class="card-desc">${it.desc.substring(0, 130)}${it.desc.length > 130 ? "..." : ""}</div>
+      <div class="detail-meta" style="margin-top:8px;">
+        ${(it.tools || []).slice(0, 3).map(t => `<span class="meta-tag">${t}</span>`).join("")}
+      </div>
+    `;
+    card.addEventListener("click", () => selectItem(it.id));
+    grid.appendChild(card);
+  });
+
+  container.appendChild(grid);
+  container.scrollTop = 0;
+}
+
+// ============================================================
+// SÉLECTION D'UN ÉLÉMENT
+// ============================================================
+function selectItem(id) {
+  for (const catName in CATEGORIES) {
+    const item = CATEGORIES[catName].items.find(it => it.id === id);
+    if (item) {
+      renderDetail(item);
+      document.getElementById("rightPanel").scrollTop = 0;
+      if (window.innerWidth < 900) {
+        document.getElementById("rightPanel").scrollIntoView({ behavior: "smooth" });
+      }
+      return;
+    }
+  }
+}
+
+// ============================================================
+// RENDU DES DÉTAILS
+// ============================================================
+async function renderDetail(item) {
+  const container = document.getElementById("detailContent");
+
+  const descClass = "detail-desc" + (item.id === "red-lua-cheats" ? " lua-card" : "");
+
+  let html = `
+    <div class="detail-title gold-text">${item.icon} ${item.name}</div>
+    <div class="${descClass}">${item.desc}</div>
+    <div class="detail-meta">
+      ${(item.tools || []).map(t => `<span class="meta-tag">${t}</span>`).join("")}
+    </div>
+  `;
+
+  // Liens externes (Mega / Telegram / Discord / share.zip)
+  const externalLinks = [];
+  if (item.megaLink) {
+    externalLinks.push({ label: "Accéder au dossier Mega", url: item.megaLink, icon: "📥", style: "mega" });
+  }
+  if (Array.isArray(item.links)) {
+    externalLinks.push(...item.links);
+  }
+
+  if (externalLinks.length > 0) {
+    html += `
+      <div style="margin-top:12px;">
+        <div class="gold-text" style="font-size:12px;margin-bottom:6px;">🔗 Liens & Téléchargements</div>
+        ${externalLinks.map(l => `
+          <button class="link-btn ${l.style || ''}" onclick="window.open('${l.url}', '_blank')">
+            <span>${l.icon || "🔗"}</span>
+            <span>${l.label || l.url}</span>
+            <span style="opacity:0.7;">↗</span>
+          </button>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  if (item.tutorial) {
+    html += `
+      <div style="margin-top:12px;">
+        <div class="gold-text" style="font-size:12px;margin-bottom:6px;">📋 Tutoriel complet</div>
+        <div class="tutorial-content">${formatTutorial(item.tutorial)}</div>
+      </div>
+    `;
+  }
+
+  if (item.wiki) {
+    html += `
+      <div style="margin-top:12px;">
+        <div class="gold-text" style="font-size:12px;margin-bottom:6px;">🌐 Fiche Wikipédia</div>
+        <div class="wiki-box" id="wikiBox">
+          <div class="wiki-title">${item.wiki}</div>
+          <div class="wiki-loading">Chargement depuis Wikipédia...</div>
+        </div>
+      </div>
+    `;
+  }
+
+  container.innerHTML = html;
+
+  if (item.wiki) {
+    try {
+      const wiki = await fetchWikipedia(item.wiki, "fr");
+      const box = document.getElementById("wikiBox");
+      if (box) {
+        if (wiki.error) {
+          box.innerHTML = `
+            <div class="wiki-title">${wiki.title}</div>
+            <div class="wiki-loading">⚠️ Wikipédia inaccessible. <a href="${wiki.url}" target="_blank">Ouvrir sur Wikipédia</a></div>
+          `;
+        } else {
+          box.innerHTML = `
+            <div class="wiki-title">${wiki.title}</div>
+            <div>${wiki.extract}</div>
+            <div style="margin-top:8px;"><a href="${wiki.url}" target="_blank">📖 Lire l'article complet</a></div>
+          `;
+        }
+      }
+    } catch (e) {
+      console.warn("Erreur wiki:", e);
+    }
+  }
+}
+
+// ============================================================
+// FORMATAGE DES TUTORIELS
+// ============================================================
+function formatTutorial(text) {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/^(#.*)$/gm, '<span class="comment">$1</span>')
+    .replace(/(pkg install|apt install|pip install|git clone|npm install|wget|curl|sudo|cd |mkdir |chmod |\.\/|apktool|apksigner|keytool)/g, '<span class="cmd">$1</span>')
+    .replace(/(r2|ghidra|radare2|jadx|apktool|readelf|objdump|nm|strings|file|saveinstance)/gi, '<span class="keyword">$1</span>');
+}
+
+// ============================================================
+// INITIALISATION
+// ============================================================
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".nav-btn").forEach(btn => {
+    btn.addEventListener("click", () => showCategory(btn.dataset.cat));
+  });
+  document.getElementById("searchBox").addEventListener("input", (e) => {
+    AppState.searchQuery = e.target.value.toLowerCase();
+    renderContent();
+  });
+  document.getElementById("btnClose")?.addEventListener("click", () => {
+    if (confirm("Fermer Vaztoodix RE Studio ?")) window.close();
+  });
+  document.getElementById("btnCollapseRight")?.addEventListener("click", () => {
+    document.getElementById("rightPanel").classList.toggle("collapsed");
+  });
+
+  // Bouton Discord dans le header
+  document.getElementById("btnDiscordHeader")?.addEventListener("click", () => {
+    window.open("https://discord.gg/xzqhhXdH9j", "_blank");
+  });
+
+  showCategory("home");
+});
+
+console.log("[Vaztoodix RE Studio] Initialisé ✅");
+</script>
+</body>
+</html>
