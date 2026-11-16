@@ -645,4 +645,84 @@ end
   },
   {
     icon: "🌐", name: "Outils Web & APIs",
-    desc: "Outils
+    desc: "Outils d'analyse web et interfaces API pour le développement de scripts de reverse engineering.",
+    tags: ["API", "Web", "JSON"],
+    links: [{ label: "API Reference", url: "https://developer.mozilla.org/fr/" }],
+    tutorial: `# ===== OUTILS WEB & APIS =====
+# Utilisation d'APIs REST pour fetch des données de jeux ou des status de serveurs.
+fetch('https://api.example.com/status')
+  .then(res => res.json())
+  .then(data => console.log(data));
+# ===== FIN =====`
+  }
+];
+
+function renderCards() {
+  const container = document.getElementById("content");
+  container.innerHTML = "";
+  const grid = document.createElement("div");
+  grid.className = "cards-grid";
+  CARDS.forEach(item => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <div class="card-title"><span>${item.icon}</span><span class="gold-text">${item.name}</span></div>
+      <div class="card-desc">${item.desc}</div>
+      <div style="margin-top:8px;">${item.tags.map(t => `<span class="meta-tag">${t}</span>`).join(" ")}</div>
+    `;
+    card.addEventListener("click", () => showDetail(item));
+    grid.appendChild(card);
+  });
+  container.appendChild(grid);
+}
+
+function showDetail(item) {
+  const detail = document.getElementById("detailContent");
+  let linksHtml = "";
+  if (item.links) {
+    linksHtml = item.links.map(l => `<a href="${l.url}" target="_blank" class="link-btn ${l.type || ''}">${l.label} ↗</a>`).join("");
+  }
+  detail.innerHTML = `
+    <h3 class="detail-title gold-text">${item.icon} ${item.name}</h3>
+    <div class="detail-desc">${item.desc}</div>
+    <div class="detail-meta">${item.tags.map(t => `<span class="meta-tag">${t}</span>`).join("")}</div>
+    <div class="tutorial-content">${item.tutorial}</div>
+    ${linksHtml}
+  `;
+}
+
+// Gestion de la playlist YouTube
+function renderPlaylist() {
+  const playlistContainer = document.getElementById("videoPlaylist");
+  playlistContainer.innerHTML = "";
+  VIDEOS.forEach((vid, index) => {
+    const thumb = document.createElement("div");
+    thumb.className = "video-thumb" + (index === 0 ? " active" : "");
+    thumb.innerHTML = `<span class="thumb-num">${index + 1}</span><span>${vid.title}</span>`;
+    thumb.addEventListener("click", () => {
+      document.getElementById("ytPlayer").src = `https://www.youtube.com/embed/${vid.id}`;
+      document.querySelectorAll(".video-thumb").forEach(t => t.classList.remove("active"));
+      thumb.classList.add("active");
+    });
+    playlistContainer.appendChild(thumb);
+  });
+  
+  const playlistLink = document.createElement("a");
+  playlistLink.href = PLAYLIST_URL;
+  playlistLink.target = "_blank";
+  playlistLink.className = "playlist-link";
+  playlistLink.innerText = "📺 Playlist complète";
+  playlistContainer.appendChild(playlistLink);
+}
+
+document.getElementById("btnDiscordHeader")?.addEventListener("click", () => window.open("https://discord.gg/xzqhhXdH9j", "_blank"));
+document.getElementById("btnClose")?.addEventListener("click", () => { if (confirm("Fermer ?")) window.close(); });
+document.getElementById("btnCollapseRight")?.addEventListener("click", () => {
+  document.getElementById("rightPanel").classList.toggle("collapsed");
+});
+
+renderCards();
+renderPlaylist();
+</script>
+</body>
+</html>
