@@ -23,11 +23,12 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             git diff origin/${{ github.base_ref }}...HEAD > changes.diff
-          else
+          elif git rev-parse --verify HEAD~1 >/dev/null 2>&1; then
             git diff HEAD~1 HEAD > changes.diff
+          else
+            git show --stat > changes.diff
           fi
           head -c 12000 changes.diff > diff_trimmed.txt
-          echo "EOF" >> diff_trimmed.txt
 
       - name: Analyser avec Gemini API
         env:
@@ -39,20 +40,10 @@ jobs:
           fi
 
           DIFF_CONTENT=$(cat diff_trimmed.txt)
-          PROMPT=$(cat <<EOF
-Tu es un assistant technique qui analyse en continu les modifications d'un site web hébergé sur GitHub Pages (HTML/CSS/JS, liens, sécurité, performance).
-Analyse ce diff et réponds en français avec :
-1. Résumé rapide des changements
-2. Bugs potentiels, liens cassés ou problèmes de sécurité/affichage
-3. Améliorations rapides conseillées
+          INSTRUCTION="Tu es un assistant technique qui analyse en continu les modifications d'un site web GitHub Pages (HTML/CSS/JS, liens, sécurité, performance). Réponds en français avec : 1. Résumé rapide des changements 2. Bugs potentiels, liens cassés ou problèmes de sécurité/affichage 3. Améliorations rapides conseillées. Voici le diff :"
 
-Voici le diff :
-$DIFF_CONTENT
-EOF
-)
-
-          jq -n --arg prompt "$PROMPT" '{
-            contents: [{ parts: [{ text: $prompt }] }]
+          jq -n --arg inst "$INSTRUCTION" --arg diff "$DIFF_CONTENT" '{
+            contents: [{ parts: [{ text: ($inst + "\n\n" + $diff) }] }]
           }' > payload.json
 
           RESPONSE=$(curl -s -X POST \
