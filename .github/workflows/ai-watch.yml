@@ -1,0 +1,65 @@
+name: Vaztoodix AI Continuous Watch
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  analyze-changes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le code et l'historique
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Extraire le diff des modifications
+        id: diff
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git diff origin/${{ github.base_ref }}...HEAD > changes.diff
+          else
+            git diff HEAD~1 HEAD > changes.diff
+          fi
+          head -c 12000 changes.diff > diff_trimmed.txt
+          echo "EOF" >> diff_trimmed.txt
+
+      - name: Analyser avec Gemini API
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          if [ ! -s diff_trimmed.txt ]; then
+            echo "Aucun changement détecté dans le diff."
+            exit 0
+          fi
+
+          DIFF_CONTENT=$(cat diff_trimmed.txt)
+          PROMPT=$(cat <<EOF
+Tu es un assistant technique qui analyse en continu les modifications d'un site web hébergé sur GitHub Pages (HTML/CSS/JS, liens, sécurité, performance).
+Analyse ce diff et réponds en français avec :
+1. Résumé rapide des changements
+2. Bugs potentiels, liens cassés ou problèmes de sécurité/affichage
+3. Améliorations rapides conseillées
+
+Voici le diff :
+$DIFF_CONTENT
+EOF
+)
+
+          jq -n --arg prompt "$PROMPT" '{
+            contents: [{ parts: [{ text: $prompt }] }]
+          }' > payload.json
+
+          RESPONSE=$(curl -s -X POST \
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d @payload.json)
+
+          echo "=== RAPPORT IA VAZTOODIX ==="
+          echo "$RESPONSE" | jq -r '.candidates[0].content.parts[0].text // .error.message // "Réponse vide"'
+          
