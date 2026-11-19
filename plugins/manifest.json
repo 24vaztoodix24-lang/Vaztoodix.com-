@@ -1,0 +1,11 @@
+{
+  "plugins": [
+    {
+      "id": "welcome-banner",
+      "name": "Bandeau Vaztoodix",
+      "version": "1.0.0",
+      "enabled": true,
+      "entry": "./plugins/welcome-banner.js"
+    }
+  ]
+}
