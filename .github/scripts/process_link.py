@@ -1,6 +1,7 @@
 import os
 import json
 import re
+import time
 import urllib.request
 import urllib.error
 from datetime import datetime, timezone
@@ -91,14 +92,32 @@ api_req = urllib.request.Request(
     method="POST"
 )
 
-try:
-    with urllib.request.urlopen(api_req, timeout=90) as api_resp:
-        result = json.loads(api_resp.read().decode("utf-8"))
-except urllib.error.HTTPError as e:
-    error_body = e.read().decode("utf-8", errors="ignore")
-    raise RuntimeError(f"Erreur API Gemini ({e.code} {e.reason}): {error_body}")
-except TimeoutError:
-    raise RuntimeError("Erreur API Gemini : délai d'attente dépassé (90s).")
+max_retries = 4
+result = None
+
+for attempt in range(1, max_retries + 1):
+    try:
+        with urllib.request.urlopen(api_req, timeout=90) as api_resp:
+            result = json.loads(api_resp.read().decode("utf-8"))
+        break
+    except urllib.error.HTTPError as e:
+        error_body = e.read().decode("utf-8", errors="ignore")
+        if e.code in (429, 500, 502, 503, 504) and attempt < max_retries:
+            wait_time = attempt * 5
+            print(f"Tentative {attempt}/{max_retries} : erreur {e.code}, nouvel essai dans {wait_time}s...")
+            time.sleep(wait_time)
+        else:
+            raise RuntimeError(f"Erreur API Gemini ({e.code} {e.reason}): {error_body}")
+    except TimeoutError:
+        if attempt < max_retries:
+            wait_time = attempt * 5
+            print(f"Tentative {attempt}/{max_retries} : timeout, nouvel essai dans {wait_time}s...")
+            time.sleep(wait_time)
+        else:
+            raise RuntimeError("Erreur API Gemini : délai d'attente dépassé après plusieurs essais.")
+
+if result is None:
+    raise RuntimeError("Aucune réponse reçue de l'API Gemini.")
 
 raw_json_text = result["candidates"][0]["content"]["parts"][0]["text"].strip()
 new_entry = json.loads(raw_json_text)
