@@ -26,7 +26,7 @@ try:
         clean = re.sub(r"<style[\s\S]*?</style>", " ", clean, flags=re.I)
         clean = re.sub(r"<[^>]+>", " ", clean)
         clean = re.sub(r"\s+", " ", clean).strip()
-        page_text = clean[:12000]
+        page_text = clean[:6000]
 except Exception as e:
     page_text = f"(Impossible de lire directement la page HTML : {e}. Analyse à partir de l'URL et de tes connaissances.)"
 
@@ -92,11 +92,13 @@ api_req = urllib.request.Request(
 )
 
 try:
-    with urllib.request.urlopen(api_req, timeout=30) as api_resp:
+    with urllib.request.urlopen(api_req, timeout=90) as api_resp:
         result = json.loads(api_resp.read().decode("utf-8"))
 except urllib.error.HTTPError as e:
     error_body = e.read().decode("utf-8", errors="ignore")
     raise RuntimeError(f"Erreur API Gemini ({e.code} {e.reason}): {error_body}")
+except TimeoutError:
+    raise RuntimeError("Erreur API Gemini : délai d'attente dépassé (90s).")
 
 raw_json_text = result["candidates"][0]["content"]["parts"][0]["text"].strip()
 new_entry = json.loads(raw_json_text)
