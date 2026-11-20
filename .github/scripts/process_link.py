@@ -1,8 +1,8 @@
-import os
 import json
+import os
 import re
-import urllib.request
 import urllib.error
+import urllib.request
 from datetime import datetime, timezone
 
 GROQ_API_KEY = os.environ["GROQ_API_KEY"]
@@ -12,6 +12,7 @@ MODS_FILE = "data/mods.json"
 url_match = re.search(r'https?://[^\s<>"\']+', ISSUE_BODY)
 if not url_match:
     raise ValueError("Aucun lien valide trouvé dans l'Issue.")
+
 target_url = url_match.group(0)
 
 page_text = ""
@@ -22,13 +23,16 @@ try:
     )
     with urllib.request.urlopen(req, timeout=15) as resp:
         html = resp.read().decode("utf-8", errors="ignore")
-        clean = re.sub(r"<script[\s\S]*?</script>", " ", html, flags=re.I)
-        clean = re.sub(r"<style[\s\S]*?</style>", " ", clean, flags=re.I)
-        clean = re.sub(r"<[^>]+>", " ", clean)
-        clean = re.sub(r"\s+", " ", clean).strip()
-        page_text = clean[:3500]
+    clean = re.sub(r"<script[\s\S]*?</script>", " ", html, flags=re.I)
+    clean = re.sub(r"<style[\s\S]*?</style>", " ", clean, flags=re.I)
+    clean = re.sub(r"<[^>]+>", " ", clean)
+    clean = re.sub(r"\s+", " ", clean).strip()
+    page_text = clean[:3500]
 except Exception as e:
-    page_text = f"(Impossible de lire directement la page HTML : {e}. Analyse à partir de l'URL et de tes connaissances.)"
+    page_text = (
+        f"(Impossible de lire directement la page HTML: {e}. "
+        "Analyse à partir de l'URL et de tes connaissances.)"
+    )
 
 if os.path.exists(MODS_FILE):
     with open(MODS_FILE, "r", encoding="utf-8") as f:
@@ -36,8 +40,15 @@ if os.path.exists(MODS_FILE):
 else:
     db = {"mods": []}
 
-existing_categories = sorted(list({m.get("categorie", "") for m in db["mods"] if m.get("categorie")}))
-existing_games = sorted(list({m.get("jeu", "") for m in db["mods"] if m.get("jeu")}))
+if not isinstance(db, dict) or not isinstance(db.get("mods"), list):
+    db = {"mods": []}
+
+existing_categories = sorted(
+    list({m.get("categorie", "") for m in db["mods"] if m.get("categorie")})
+)
+existing_games = sorted(
+    list({m.get("jeu", "") for m in db["mods"] if m.get("jeu")})
+)
 today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
 prompt = f"""
@@ -45,12 +56,13 @@ Tu es l'assistant d'indexation automatique du site Vaztoodix RE Studio.
 L'utilisateur t'envoie uniquement un lien. Tu dois analyser ce lien et générer UNE entrée JSON complète.
 
 RÈGLE FONDAMENTALE :
-- L'exemple "Switch > Jeux > Mario Kart 8 Deluxe" est UNIQUEMENT un exemple de structure logique.
-- Tu dois déduire dynamiquement la vraie catégorie, sous-catégorie et le vrai jeu/projet à partir du lien fourni (ex: PC, Android, iOS, Switch, Outils, Émulation, Reverse Engineering, etc.).
-- Si la catégorie ou le jeu n'existe pas encore dans la liste existante, CRÉE-LE librement avec un nom clair et propre.
-- Si une catégorie ou un jeu similaire existe déjà dans la liste ci-dessous, réutilise exactement le même nom :
-  Catégories existantes : {existing_categories}
-  Jeux/Projets existants : {existing_games}
+L'exemple "Switch > Jeux > Mario Kart 8 Deluxe" est UNIQUEMENT un exemple de structure logique.
+Tu dois déduire dynamiquement la vraie catégorie, sous-catégorie et le vrai jeu/projet à partir du lien et du contenu extrait.
+Si la catégorie ou le jeu n'existe pas encore dans la liste existante, CRÉE-LE librement avec un nom clair.
+Si une catégorie ou un jeu similaire existe déjà dans la liste ci-dessous, réutilise exactement le même nom.
+
+Catégories existantes: {existing_categories}
+Jeux/Projets existants: {existing_games}
 
 Réponds UNIQUEMENT avec un objet JSON valide respectant exactement ce schéma :
 {{
@@ -68,10 +80,12 @@ Réponds UNIQUEMENT avec un objet JSON valide respectant exactement ce schéma :
   "wiki": "Informations wiki, compatibilité et contexte en français"
 }}
 
-URL à analyser : {target_url}
+URL à analyser :
+{target_url}
+
 Contenu extrait de la page :
 {page_text}
-"""
+""".strip()
 
 models_to_try = ["openai/gpt-oss-120b", "openai/gpt-oss-20b"]
 result = None
@@ -114,10 +128,21 @@ if result is None:
 raw_json_text = result["choices"][0]["message"]["content"].strip()
 new_entry = json.loads(raw_json_text)
 
-db["mods"] = [m for m in db["mods"] if m.get("publication", {}).get("lien") != target_url]
+db["mods"] = [
+    m for m in db["mods"]
+    if m.get("publication", {}).get("lien") != target_url
+]
 db["mods"].append(new_entry)
 
+os.makedirs(os.path.dirname(MODS_FILE), exist_ok=True)
 with open(MODS_FILE, "w", encoding="utf-8") as f:
     json.dump(db, f, ensure_ascii=False, indent=2)
 
-print("Entrée ajoutée avec succès :", new_entry["categorie"], ">", new_entry["jeu"], ">", new_entry["publication"]["titre"])
+print(
+    "Entrée ajoutée avec succès:",
+    new_entry.get("categorie", ""),
+    ">",
+    new_entry.get("jeu", ""),
+    ">",
+    new_entry.get("publication", {}).get("titre", new_entry.get("id", ""))
+)
