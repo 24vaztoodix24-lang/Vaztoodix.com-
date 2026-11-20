@@ -79,45 +79,56 @@ Contenu extrait de la page :
 {page_text}
 """
 
-api_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key={GEMINI_API_KEY}"
-payload = json.dumps({
-    "contents": [{"parts": [{"text": prompt}]}],
-    "generationConfig": {"responseMimeType": "application/json"}
-}).encode("utf-8")
+models_to_try = [
+    "gemini-3.8-flash",
+    "gemini-2.5-flash",
+    "gemini-2.0-flash",
+]
 
-api_req = urllib.request.Request(
-    api_url,
-    data=payload,
-    headers={"Content-Type": "application/json"},
-    method="POST"
-)
-
-max_retries = 4
 result = None
+last_error = None
 
-for attempt in range(1, max_retries + 1):
-    try:
-        with urllib.request.urlopen(api_req, timeout=90) as api_resp:
-            result = json.loads(api_resp.read().decode("utf-8"))
+for model_name in models_to_try:
+    api_url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={GEMINI_API_KEY}"
+    payload = json.dumps({
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {"responseMimeType": "application/json"}
+    }).encode("utf-8")
+
+    api_req = urllib.request.Request(
+        api_url,
+        data=payload,
+        headers={"Content-Type": "application/json"},
+        method="POST"
+    )
+
+    for attempt in range(1, 3):
+        try:
+            with urllib.request.urlopen(api_req, timeout=60) as api_resp:
+                result = json.loads(api_resp.read().decode("utf-8"))
+            print(f"Réponse obtenue via {model_name}")
+            break
+        except urllib.error.HTTPError as e:
+            error_body = e.read().decode("utf-8", errors="ignore")
+            last_error = f"Erreur API Gemini sur {model_name} ({e.code} {e.reason}): {error_body}"
+            if e.code in (429, 500, 502, 503, 504) and attempt < 2:
+                time.sleep(4)
+            else:
+                print(f"Échec sur {model_name} ({e.code}), passage au modèle suivant...")
+                break
+        except TimeoutError:
+            last_error = f"Timeout sur {model_name}"
+            if attempt < 2:
+                time.sleep(4)
+            else:
+                print(f"Timeout sur {model_name}, passage au modèle suivant...")
+                break
+
+    if result is not None:
         break
-    except urllib.error.HTTPError as e:
-        error_body = e.read().decode("utf-8", errors="ignore")
-        if e.code in (429, 500, 502, 503, 504) and attempt < max_retries:
-            wait_time = attempt * 5
-            print(f"Tentative {attempt}/{max_retries} : erreur {e.code}, nouvel essai dans {wait_time}s...")
-            time.sleep(wait_time)
-        else:
-            raise RuntimeError(f"Erreur API Gemini ({e.code} {e.reason}): {error_body}")
-    except TimeoutError:
-        if attempt < max_retries:
-            wait_time = attempt * 5
-            print(f"Tentative {attempt}/{max_retries} : timeout, nouvel essai dans {wait_time}s...")
-            time.sleep(wait_time)
-        else:
-            raise RuntimeError("Erreur API Gemini : délai d'attente dépassé après plusieurs essais.")
 
 if result is None:
-    raise RuntimeError("Aucune réponse reçue de l'API Gemini.")
+    raise RuntimeError(last_error or "Aucune réponse reçue de l'API Gemini.")
 
 raw_json_text = result["candidates"][0]["content"]["parts"][0]["text"].strip()
 new_entry = json.loads(raw_json_text)
