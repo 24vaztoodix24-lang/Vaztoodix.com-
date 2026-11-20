@@ -13,6 +13,20 @@
       },
       "explication": "Explication claire du mod : ce qu'il modifie en jeu, comment il fonctionne et ce qu'il faut savoir avant de l'installer.",
       "wiki": "Infos wiki : présentation du mod et de Mario Kart 8 Deluxe, compatibilité, versions et détails de référence."
+    },
+    {
+      "id": "recomplauncher",
+      "categorie": "PC",
+      "sous_categorie": "Outils",
+      "jeu": "RecompLauncher",
+      "publication": {
+        "titre": "RecompLauncher - Plateforme de jeux recompilés pour PC",
+        "lien": "https://recomplauncher.com/?lang=fr",
+        "type": "Outil",
+        "date_ajout": "2026-11-20"
+      },
+      "explication": "RecompLauncher est une plateforme qui propose des versions recompilées de jeux console pour les systèmes d'exploitation PC (Windows, Linux, macOS). Elle permet aux utilisateurs d'apporter leurs propres copies de jeux et de les jouer nativement sur PC sans émulation. Le site répertorie de nombreux titres, notamment des jeux Nintendo 64, PlayStation et autres, sous forme de recompilations compatibles avec les architectures modernes.",
+      "wiki": "RecompLauncher fonctionne comme un hub de distribution de recompilations, offrant des téléchargements directs, des mises à jour automatiques et un accès à la RecompStore. Les jeux sont classés par console d'origine (ex. Nintendo 64, PS5) mais sont exécutés nativement sur PC. Aucun compte n'est requis, seulement le disque ou l'image du jeu original. Compatibilité : Windows 10/11, Linux (distributions récentes), macOS (Intel et Apple Silicon via Rosetta 2)."
     }
   ]
 }
