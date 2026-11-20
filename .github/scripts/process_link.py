@@ -1,12 +1,11 @@
 import os
 import json
 import re
-import time
 import urllib.request
 import urllib.error
 from datetime import datetime, timezone
 
-GEMINI_API_KEY = os.environ["GEMINI_API_KEY"]
+GROQ_API_KEY = os.environ["GROQ_API_KEY"]
 ISSUE_BODY = os.environ.get("ISSUE_BODY", "").strip()
 MODS_FILE = "data/mods.json"
 
@@ -27,7 +26,7 @@ try:
         clean = re.sub(r"<style[\s\S]*?</style>", " ", clean, flags=re.I)
         clean = re.sub(r"<[^>]+>", " ", clean)
         clean = re.sub(r"\s+", " ", clean).strip()
-        page_text = clean[:6000]
+        page_text = clean[:3500]
 except Exception as e:
     page_text = f"(Impossible de lire directement la page HTML : {e}. Analyse à partir de l'URL et de tes connaissances.)"
 
@@ -49,16 +48,11 @@ RÈGLE FONDAMENTALE :
 - L'exemple "Switch > Jeux > Mario Kart 8 Deluxe" est UNIQUEMENT un exemple de structure logique.
 - Tu dois déduire dynamiquement la vraie catégorie, sous-catégorie et le vrai jeu/projet à partir du lien fourni (ex: PC, Android, iOS, Switch, Outils, Émulation, Reverse Engineering, etc.).
 - Si la catégorie ou le jeu n'existe pas encore dans la liste existante, CRÉE-LE librement avec un nom clair et propre.
-- Si une catégorie ou un jeu similaire existe déjà dans la liste ci-dessous, réutilise exactement le même nom pour éviter les doublons :
+- Si une catégorie ou un jeu similaire existe déjà dans la liste ci-dessous, réutilise exactement le même nom :
   Catégories existantes : {existing_categories}
   Jeux/Projets existants : {existing_games}
 
-Chaque entrée représente un mod, outil ou ressource composé de :
-- "publication" : titre précis, lien exact, type (Mod, Outil, APK, Tutoriel, Ressource...), date du jour ({today}).
-- "explication" : explication claire en français de ce que fait le mod/outil et comment il fonctionne/s'installe.
-- "wiki" : fiche wiki synthétique en français (contexte du jeu ou de l'outil, compatibilité, versions, astuces/références).
-
-Réponds UNIQUEMENT avec un objet JSON valide sans bloc markdown autour, respectant exactement ce schéma :
+Réponds UNIQUEMENT avec un objet JSON valide respectant exactement ce schéma :
 {{
   "id": "slug-unique-en-minuscules",
   "categorie": "Nom de la catégorie",
@@ -79,58 +73,35 @@ Contenu extrait de la page :
 {page_text}
 """
 
-models_to_try = [
-    "gemini-3.8-flash",
-    "gemini-2.5-flash",
-    "gemini-2.0-flash",
-]
+payload = json.dumps({
+    "model": "llama-3.3-70b-versatile",
+    "messages": [
+        {"role": "system", "content": "Tu réponds uniquement avec un objet JSON valide en français."},
+        {"role": "user", "content": prompt}
+    ],
+    "response_format": {"type": "json_object"},
+    "temperature": 0.2
+}).encode("utf-8")
 
-result = None
-last_error = None
+api_req = urllib.request.Request(
+    "https://api.groq.com/openai/v1/chat/completions",
+    data=payload,
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {GROQ_API_KEY}",
+        "User-Agent": "VaztoodixBot/1.0"
+    },
+    method="POST"
+)
 
-for model_name in models_to_try:
-    api_url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={GEMINI_API_KEY}"
-    payload = json.dumps({
-        "contents": [{"parts": [{"text": prompt}]}],
-        "generationConfig": {"responseMimeType": "application/json"}
-    }).encode("utf-8")
+try:
+    with urllib.request.urlopen(api_req, timeout=30) as api_resp:
+        result = json.loads(api_resp.read().decode("utf-8"))
+except urllib.error.HTTPError as e:
+    error_body = e.read().decode("utf-8", errors="ignore")
+    raise RuntimeError(f"Erreur API Groq ({e.code} {e.reason}): {error_body}")
 
-    api_req = urllib.request.Request(
-        api_url,
-        data=payload,
-        headers={"Content-Type": "application/json"},
-        method="POST"
-    )
-
-    for attempt in range(1, 3):
-        try:
-            with urllib.request.urlopen(api_req, timeout=60) as api_resp:
-                result = json.loads(api_resp.read().decode("utf-8"))
-            print(f"Réponse obtenue via {model_name}")
-            break
-        except urllib.error.HTTPError as e:
-            error_body = e.read().decode("utf-8", errors="ignore")
-            last_error = f"Erreur API Gemini sur {model_name} ({e.code} {e.reason}): {error_body}"
-            if e.code in (429, 500, 502, 503, 504) and attempt < 2:
-                time.sleep(4)
-            else:
-                print(f"Échec sur {model_name} ({e.code}), passage au modèle suivant...")
-                break
-        except TimeoutError:
-            last_error = f"Timeout sur {model_name}"
-            if attempt < 2:
-                time.sleep(4)
-            else:
-                print(f"Timeout sur {model_name}, passage au modèle suivant...")
-                break
-
-    if result is not None:
-        break
-
-if result is None:
-    raise RuntimeError(last_error or "Aucune réponse reçue de l'API Gemini.")
-
-raw_json_text = result["candidates"][0]["content"]["parts"][0]["text"].strip()
+raw_json_text = result["choices"][0]["message"]["content"].strip()
 new_entry = json.loads(raw_json_text)
 
 db["mods"] = [m for m in db["mods"] if m.get("publication", {}).get("lien") != target_url]
@@ -139,4 +110,4 @@ db["mods"].append(new_entry)
 with open(MODS_FILE, "w", encoding="utf-8") as f:
     json.dump(db, f, ensure_ascii=False, indent=2)
 
-print("Entrée ajoutée :", new_entry["categorie"], ">", new_entry["jeu"], ">", new_entry["publication"]["titre"])
+print("Entrée ajoutée avec succès :", new_entry["categorie"], ">", new_entry["jeu"], ">", new_entry["publication"]["titre"])
