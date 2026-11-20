@@ -2,6 +2,7 @@ import os
 import json
 import re
 import urllib.request
+import urllib.error
 from datetime import datetime, timezone
 
 GEMINI_API_KEY = os.environ["GEMINI_API_KEY"]
@@ -90,8 +91,12 @@ api_req = urllib.request.Request(
     method="POST"
 )
 
-with urllib.request.urlopen(api_req, timeout=30) as api_resp:
-    result = json.loads(api_resp.read().decode("utf-8"))
+try:
+    with urllib.request.urlopen(api_req, timeout=30) as api_resp:
+        result = json.loads(api_resp.read().decode("utf-8"))
+except urllib.error.HTTPError as e:
+    error_body = e.read().decode("utf-8", errors="ignore")
+    raise RuntimeError(f"Erreur API Gemini ({e.code} {e.reason}): {error_body}")
 
 raw_json_text = result["candidates"][0]["content"]["parts"][0]["text"].strip()
 new_entry = json.loads(raw_json_text)
