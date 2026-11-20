@@ -1,0 +1,54 @@
+name: Auto-Ajouter Mod via Lien
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  analyze-and-commit:
+    runs-on: ubuntu-latest
+    if: github.event.issue.user.login == github.repository_owner
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+
+      - name: Configurer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Analyser le lien avec l'IA et mettre à jour mods.json
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: python .github/scripts/process_link.py
+
+      - name: Enregistrer les changements sur GitHub
+        run: |
+          git config user.name "Vaztoodix Bot"
+          git config user.email "bot@vaztoodix.local"
+          git add data/mods.json
+          git commit -m "Auto-ajout mod depuis Issue #${{ github.event.issue.number }}" || exit 0
+          git push
+
+      - name: Fermer l'Issue avec confirmation
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: "✅ Lien analysé et ajouté automatiquement dans `data/mods.json` !"
+            });
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              state: "closed"
+            });
+            
