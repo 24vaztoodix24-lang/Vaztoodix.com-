@@ -73,33 +73,43 @@ Contenu extrait de la page :
 {page_text}
 """
 
-payload = json.dumps({
-    "model": "llama-3.3-70b-versatile",
-    "messages": [
-        {"role": "system", "content": "Tu réponds uniquement avec un objet JSON valide en français."},
-        {"role": "user", "content": prompt}
-    ],
-    "response_format": {"type": "json_object"},
-    "temperature": 0.2
-}).encode("utf-8")
+models_to_try = ["openai/gpt-oss-120b", "openai/gpt-oss-20b"]
+result = None
+last_error = None
 
-api_req = urllib.request.Request(
-    "https://api.groq.com/openai/v1/chat/completions",
-    data=payload,
-    headers={
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {GROQ_API_KEY}",
-        "User-Agent": "VaztoodixBot/1.0"
-    },
-    method="POST"
-)
+for model_name in models_to_try:
+    payload = json.dumps({
+        "model": model_name,
+        "messages": [
+            {"role": "system", "content": "Tu réponds uniquement avec un objet JSON valide en français."},
+            {"role": "user", "content": prompt}
+        ],
+        "response_format": {"type": "json_object"},
+        "temperature": 0.2
+    }).encode("utf-8")
 
-try:
-    with urllib.request.urlopen(api_req, timeout=30) as api_resp:
-        result = json.loads(api_resp.read().decode("utf-8"))
-except urllib.error.HTTPError as e:
-    error_body = e.read().decode("utf-8", errors="ignore")
-    raise RuntimeError(f"Erreur API Groq ({e.code} {e.reason}): {error_body}")
+    api_req = urllib.request.Request(
+        "https://api.groq.com/openai/v1/chat/completions",
+        data=payload,
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {GROQ_API_KEY}",
+            "User-Agent": "VaztoodixBot/1.0"
+        },
+        method="POST"
+    )
+
+    try:
+        with urllib.request.urlopen(api_req, timeout=30) as api_resp:
+            result = json.loads(api_resp.read().decode("utf-8"))
+        break
+    except urllib.error.HTTPError as e:
+        error_body = e.read().decode("utf-8", errors="ignore")
+        last_error = f"Erreur API Groq sur {model_name} ({e.code} {e.reason}): {error_body}"
+        print(last_error)
+
+if result is None:
+    raise RuntimeError(last_error or "Aucune réponse reçue de l'API Groq.")
 
 raw_json_text = result["choices"][0]["message"]["content"].strip()
 new_entry = json.loads(raw_json_text)
