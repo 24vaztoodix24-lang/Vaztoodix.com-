@@ -1,0 +1,18 @@
+{
+  "mods": [
+    {
+      "id": "switch-mk8dx-example-mod",
+      "categorie": "Switch",
+      "sous_categorie": "Jeux",
+      "jeu": "Mario Kart 8 Deluxe",
+      "publication": {
+        "titre": "Exemple de publication sur Mario Kart 8 Deluxe",
+        "lien": "https://exemple.com/lien-du-mod",
+        "type": "Mod",
+        "date_ajout": "2026-11-20"
+      },
+      "explication": "Explication claire du mod : ce qu'il modifie en jeu, comment il fonctionne et ce qu'il faut savoir avant de l'installer.",
+      "wiki": "Infos wiki : présentation du mod et de Mario Kart 8 Deluxe, compatibilité, versions et détails de référence."
+    }
+  ]
+}
