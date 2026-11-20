@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Redirection — Vaztoodix RE Studio</title>
+  <script>
+    (function () {
+      var path = window.location.pathname;
+      var repoPrefix = "/Vaztoodix.com-";
+      var clean = path.indexOf(repoPrefix) === 0 ? path.slice(repoPrefix.length) : path;
+      clean = clean.replace(/^\/+|\/+$/g, "").toLowerCase();
+
+      var knownPages = [
+        "mods",
+        "outils",
+        "switch",
+        "lua-cheats",
+        "termux",
+        "linux",
+        "ia",
+        "ides"
+      ];
+
+      if (knownPages.indexOf(clean) !== -1) {
+        window.location.replace(repoPrefix + "/?cat=" + encodeURIComponent(clean));
+      } else {
+        window.location.replace(repoPrefix + "/");
+      }
+    })();
+  </script>
+</head>
+<body style="background:#0a0a0f;color:#ffd700;font-family:sans-serif;padding:24px;">
+  Redirection vers Vaztoodix RE Studio...
+</body>
+</html>
