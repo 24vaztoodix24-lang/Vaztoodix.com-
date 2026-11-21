@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Vaztoodix RE Studio — Lua & Cheats (Rayan)</title>
+<meta name="description" content="Scripts Lua, injection DLL, cheats Fortnite 2017-2022, V-Bucks, serveurs. Zone Rouge — IOS / Modding Rayan.">
+<meta property="og:title" content="Vaztoodix RE Studio — Lua & Cheats">
+<meta property="og:description" content="Scripts Lua, injection DLL, cheats, vidéos explicatives et outils de modding.">
+<meta property="og:image" content="https://nsvault.me/wp-content/uploads/2026/04/logo.png">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body {
+  height: 100%;
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: radial-gradient(circle at top left, #0a0a0f, #050508 60%, #020204);
+  color: #e8e8f0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.gold-text {
+  background: linear-gradient(135deg, #ffd700 0%, #ffb300 25%, #fff8b0 50%, #ffb300 75%, #b8860b 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; font-weight: bold;
+}
+.pink-rayan {
+  color: #ff79c6;
+  font-weight: bold;
+  text-shadow: 0 0 8px rgba(255, 121, 198, 0.6);
+}
+.app-header {
+  height: 52px;
+  background: rgba(15, 15, 25, 0.85);
+  border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 14px; z-index: 100; flex-shrink: 0;
+}
+.logo-area { display: flex; align-items: center; gap: 10px; }
+.logo {
+  width: 36px; height: 36px;
+  background: radial-gradient(circle, #ffd700, #b8860b);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: bold; font-size: 11px; color: #1a1a1a;
+  flex-shrink: 0;
+}
+.app-title h1 { font-size: 14px; }
+.app-title .version { font-size: 10px; color: #888; }
+.header-actions { display: flex; gap: 6px; align-items: center; }
+.icon-btn {
+  width: 32px; height: 32px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  border-radius: 8px; color: #e8e8f0; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+}
+.discord-icon-btn {
+  width: 32px; height: 32px;
+  background: rgba(255, 215, 0, 0.08);
+  border: 1px solid rgba(255, 215, 0, 0.45);
+  border-radius: 8px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.25);
+  padding: 0; transition: 0.2s;
+}
+.discord-icon-btn svg { width: 20px; height: 20px; }
+.discord-icon-btn svg path { fill: #ffd700; }
+.top-nav {
+  background: rgba(15, 15, 25, 0.85);
+  border-bottom: 1px solid rgba(255, 215, 0, 0.15);
+  display: flex; align-items: center; gap: 4px;
+  padding: 6px 14px; flex-shrink: 0; overflow-x: auto;
+}
+.top-nav::-webkit-scrollbar { display: none; }
+.top-nav a {
+  flex-shrink: 0; font-size: 12px; padding: 6px 12px;
+  border-radius: 7px; color: #b0b0c0; text-decoration: none;
+  border: 1px solid transparent; white-space: nowrap; transition: 0.2s;
+}
+.top-nav a:hover { background: rgba(255, 215, 0, 0.08); color: #ffd700; }
+.top-nav a.active {
+  background: linear-gradient(135deg, #ffd700, #b8860b);
+  color: #1a1a1a; border-color: #fff8b0; font-weight: bold;
+}
+.app-main {
+  flex: 1; display: flex; gap: 8px; padding: 8px;
+  overflow: hidden; min-height: 0;
+}
+.sidebar {
+  width: 52px;
+  background: rgba(15, 15, 25, 0.7);
+  border: 1px solid rgba(255, 215, 0, 0.15);
+  border-radius: 12px;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 8px 0; gap: 6px; flex-shrink: 0; overflow-y: auto;
+}
+.nav-btn {
+  width: 38px; height: 38px;
+  background: rgba(40, 40, 60, 0.6);
+  border: 1px solid rgba(255, 215, 0, 0.1);
+  border-radius: 9px; font-size: 16px; cursor: pointer;
+  color: #e8e8f0; display: flex; align-items: center; justify-content: center;
+  text-decoration: none; transition: 0.2s; flex-shrink: 0;
+}
+.nav-btn.active {
+  background: linear-gradient(135deg, #ff5555, #aa0000);
+  color: #fff; border-color: #ff9999;
+  box-shadow: 0 0 12px rgba(255, 60, 60, 0.6);
+}
+.center-panel {
+  flex: 1; display: flex; flex-direction: column; gap: 8px;
+  min-width: 0; min-height: 0;
+}
+.panel-header {
+  background: rgba(15, 15, 25, 0.7);
+  border: 1px solid rgba(255, 60, 60, 0.4);
+  border-radius: 12px; padding: 10px 14px; flex-shrink: 0;
+}
+.panel-header h2 { font-size: 15px; margin-bottom: 2px; }
+.panel-header p { font-size: 11px; color: #999; }
+.video-section {
+  background: rgba(15, 15, 25, 0.75);
+  border: 1px solid rgba(255, 60, 60, 0.4);
+  border-radius: 12px;
+  padding: 10px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.video-title {
+  font-size: 12px;
+  color: #ff8888;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.video-title::before {
+  content: "▶";
+  color: #ff0000;
+  font-size: 14px;
+}
+.video-wrapper {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+.video-player {
+  flex: 1;
+  position: relative;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 60, 60, 0.3);
+  box-shadow: 0 0 20px rgba(255, 60, 60, 0.15);
+  min-height: 0;
+}
+.video-player iframe {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  border: none;
+}
+.video-playlist {
+  width: 170px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 220px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.video-playlist::-webkit-scrollbar { width: 4px; }
+.video-playlist::-webkit-scrollbar-thumb { background: rgba(255, 60, 60, 0.5); border-radius: 2px; }
+.video-thumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 7px;
+  background: rgba(30, 30, 50, 0.7);
+  border: 1px solid rgba(255, 60, 60, 0.2);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 10px;
+  color: #b0b0c0;
+  transition: 0.15s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.video-thumb:hover {
+  background: rgba(60, 30, 40, 0.8);
+  border-color: rgba(255, 90, 90, 0.6);
+  color: #fff;
+}
+.video-thumb.active {
+  background: rgba(255, 60, 60, 0.2);
+  border-color: #ff5555;
+  color: #fff;
+  box-shadow: 0 0 8px rgba(255, 60, 60, 0.4);
+}
+.video-thumb .thumb-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px;
+  background: #ff5555;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 9px;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+.playlist-link {
+  width: 100%;
+  padding: 6px 8px;
+  background: linear-gradient(135deg, #ff0000, #cc0000);
+  border: 1px solid #ff5555;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 10px;
+  font-weight: bold;
+  text-decoration: none;
+  text-align: center;
+  margin-top: 4px;
+  display: block;
+  transition: 0.15s;
+}
+.playlist-link:hover { background: linear-gradient(135deg, #ff3333, #ee0000); }
+.section-label { font-size: 12px; margin: 10px 0 8px; color: #ff8888; font-weight: bold; }
+.panel-content {
+  flex: 1; overflow-y: auto; padding: 4px;
+  border-radius: 12px; min-height: 0;
+  -webkit-overflow-scrolling: touch;
+}
+.panel-content::-webkit-scrollbar { width: 6px; }
+.panel-content::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #ff5555, #aa0000);
+  border-radius: 3px;
+}
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+  padding-bottom: 20px;
+}
+.card {
+  background: rgba(25, 25, 40, 0.8);
+  border: 1px solid rgba(255, 60, 60, 0.35);
+  border-radius: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: 0.2s;
+  min-height: 90px;
+  display: block;
+  user-select: none;
+}
+.card:hover {
+  border-color: rgba(255, 90, 90, 0.8);
+  box-shadow: 0 0 16px rgba(255, 60, 60, 0.3);
+}
+.card:active { transform: scale(0.98); }
+.card-title {
+  font-size: 13px; margin-bottom: 6px;
+  display: flex; align-items: center; gap: 6px;
+}
+.card-desc { font-size: 11px; color: #a0a0b0; line-height: 1.5; }
+.meta-tag {
+  background: rgba(255, 60, 60, 0.1);
+  border: 1px solid rgba(255, 60, 60, 0.3);
+  border-radius: 6px; padding: 4px 10px;
+  color: #ff8888; font-size: 11px;
+}
+.right-panel {
+  width: 42%; min-width: 320px;
+  background: rgba(15, 15, 25, 0.75);
+  border: 1px solid rgba(255, 60, 60, 0.4);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex; flex-direction: column; gap: 10px;
+  overflow-y: auto; min-height: 0;
+}
+.right-panel.collapsed { width: 48px; min-width: 48px; padding: 6px 4px; }
+.right-panel.collapsed .detail-content { display: none; }
+.right-header {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 12px; font-weight: bold; flex-shrink: 0;
+}
+.detail-content {
+  display: flex; flex-direction: column; gap: 10px;
+  flex: 1; min-height: 0;
+}
+.detail-title { font-size: 16px; margin-bottom: 4px; }
+.detail-desc {
+  font-size: 12px; color: #b0b0c0; line-height: 1.6;
+  padding: 10px; background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px; border-left: 3px solid #ff5555;
+}
+.detail-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 11px; }
+.tutorial-content {
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 11px; line-height: 1.7;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 8px; padding: 12px;
+  border: 1px solid rgba(255, 60, 60, 0.15);
+  white-space: pre-wrap; color: #c0c0d0;
+  overflow-x: auto;
+}
+.link-btn {
+  width: 100%; height: 36px; font-size: 12px;
+  border-radius: 7px; cursor: pointer;
+  border: 1px solid rgba(255, 60, 60, 0.5);
+  background: rgba(255, 60, 60, 0.1);
+  color: #ff8888;
+  margin-bottom: 6px;
+  display: flex; align-items: center; justify-content: center;
+  gap: 6px;
+  transition: 0.15s;
+  text-decoration: none;
+}
+.link-btn:hover { background: rgba(255, 60, 60, 0.25); }
+.link-btn.mega { border-color: rgba(255, 215, 0, 0.5); color: #ffd700; background: rgba(255, 215, 0, 0.1); }
+@media (max-width: 900px) {
+  .app-main { flex-direction: column; padding: 4px; }
+  .sidebar { width: 100%; height: 50px; flex-direction: row; padding: 6px; overflow-x: auto; overflow-y: hidden; }
+  .nav-btn { width: 36px; height: 36px; }
+  .right-panel { width: 100%; min-width: unset; height: 45vh; }
+  .right-panel.collapsed { height: 48px; width: 100%; min-width: unset; }
+  .cards-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .video-wrapper { flex-direction: column; }
+  .video-playlist { width: 100%; max-height: 140px; flex-direction: row; flex-wrap: wrap; }
+  .video-thumb { flex: 1 0 40%; }
+}
+@media (max-width: 500px) {
+  .cards-grid { grid-template-columns: 1fr; }
+  .app-title h1 { font-size: 12px; }
+  .logo { width: 32px; height: 32px; font-size: 10px; }
+}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="logo-area">
+    <div class="logo">RE</div>
+    <div class="app-title">
+      <h1 class="gold-text">Vaztoodix RE Studio</h1>
+      <span class="version">v2.1 — IOS / Modding Rayan</span>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="discord-icon-btn" id="btnDiscordHeader" title="Rejoindre le Discord">
+      <svg viewBox="0 0 127.14 96.36"><path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/></svg>
+    </button>
+    <button class="icon-btn" id="btnClose">✕</button>
+  </div>
+</header>
+
+<nav class="top-nav">
+  <a href="index.html">🏠 Accueil</a>
+  <a href="mods.html">🟣 Mods & APK</a>
+  <a href="outils.html">🔧 Outils</a>
+  <a href="switch.html">🏴‍☠️ Pirate</a>
+  <a href="lua-cheats.html" class="active">🎮 Lua & Cheats</a>
+  <a href="termux.html">📱 Termux</a>
+  <a href="linux.html">🐧 Linux</a>
+  <a href="ia.html">🤖 IA</a>
+  <a href="ides.html">💻 IDEs</a>
+</nav>
+
+<main class="app-main">
+  <aside class="sidebar">
+    <a href="index.html" class="nav-btn">🏠</a>
+    <a href="switch.html" class="nav-btn">🏴‍☠️</a>
+    <a href="lua-cheats.html" class="nav-btn active">🔴</a>
+    <a href="mods.html" class="nav-btn">🟣</a>
+    <a href="termux.html" class="nav-btn">📱</a>
+    <a href="linux.html" class="nav-btn">🐧</a>
+    <a href="ia.html" class="nav-btn">🤖</a>
+    <a href="ides.html" class="nav-btn">💻</a>
+  </aside>
+
+  <section class="center-panel">
+    <div class="panel-header">
+      <h2 class="gold-text">🔴 Zone Rouge — IOS / Modding <span class="pink-rayan">Rayan</span></h2>
+      <p>Scripts Lua, injection DLL, cheats Fortnite 2017-2022, V-Bucks, serveurs + vidéos explicatives.</p>
+    </div>
+
+    <div class="video-section">
+      <div class="video-title">Vidéos explicatives — Scripts Lua, DLL & Cheats</div>
+      <div class="video-wrapper">
+        <div class="video-player">
+          <iframe id="ytPlayer"
+            src="https://www.youtube.com/embed/Lfk-ytwkcKo"
+            title="Lecteur vidéo explicatif"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen></iframe>
+        </div>
+        <div class="video-playlist" id="videoPlaylist"></div>
+      </div>
+    </div>
+
+    <div class="panel-content" id="content"></div>
+  </section>
+
+  <aside class="right-panel" id="rightPanel">
+    <div class="right-header">
+      <span class="gold-text">📖 Détails</span>
+      <button class="icon-btn" id="btnCollapseRight" style="width:24px;height:24px;font-size:11px;">◧</button>
+    </div>
+    <div class="detail-content" id="detailContent">
+      <p style="font-size:12px;color:#888;text-align:center;padding:20px 0;">👈 Clique sur une carte.</p>
+    </div>
+  </aside>
+</main>
+
+<script>
+const VIDEOS = [
+  { id: "Lfk-ytwkcKo", title: "Vidéo 1 — Hack in Steal an Eggs" },
+  { id: "QR4FyfHRHvE", title: "Vidéo 2 — Roblox Executor" },
+  { id: "G1_dpeWWJ1Y", title: "Vidéo 3 — Script Homlander roblox" },
+  { id: "UkicTFsX_MU", title: "Vidéo 4 — Script Bloxfruit & Spawner" },
+  { id: "OjMOK8cqJO0", title: "Vidéo 5 — Script Every Gampass" },
+  { id: "lIkdXUO-uFQ", title: "Vidéo 6 — Script XVC Hub" },
+  { id: "Mpwpx9AfyyE", title: "Vidéo 7 — Script Fruit spawner & luck " },
+  { id: "YksZQr836kc", title: "Vidéo 8 — Comment Avoir tout les Gampass" }
+];
+const PLAYLIST_URL = "https://youtube.com/playlist?list=PLcEX-7_OMIPT4ZIcX83AvLfgzDsxNLJQ6&si=MH7V4m53dehfx8Eh";
+
+const LUA_TUTO = `# ===== SCRIPTS LUA, INJECTION DLL & CHEATS =====\n\n## 1. COMMENT FONCTIONNE UN SCRIPT LUA\n\nUn script Lua est un fichier texte (.lua) exécuté par un interpréteur Lua\nintégré au jeu. Il ne touche PAS directement à la mémoire du jeu : il utilise\nune API exposée par le moteur.\n\nExemple basique :\n  local player = game.Players.LocalPlayer\n  local character = player.Character\n  local humanoid = character:FindFirstChild("Humanoid")\n  humanoid.Health = 0\n\n## 2. INJECTION DLL (C++ / Windows)\n\nL'injection DLL consiste à forcer un processus cible à charger une DLL.\nÉtapes : OpenProcess -> VirtualAllocEx -> WriteProcessMemory -> CreateRemoteThread (LoadLibraryA).\n\n# ===== FIN TUTORIEL LUA & CHEATS =====`;
+
+const CARDS = [
+  { icon: "📄", name: "Structure HTML Brute", desc: "Analyse et modification directe du code source web de la page. Injection d'éléments et restructuration CSS.", tags: ["HTML5", "CSS3", "DOM"], links: [{ label: "Documentation MDN HTML", url: "https://developer.mozilla.org/fr/docs/Web/HTML" }], tutorial: `# ===== STRUCTURE HTML BRUTE =====\n<div id="app"></div>\n# ===== FIN =====` },
+  { icon: "🎮", name: "Scripts Lua & Cheats", desc: "Lua, injection DLL, cheats Fortnite 2017-2022, V-Bucks, serveurs. Tutoriel complet et détaillé.", tags: ["Lua", "DLL", "Fortnite"], links: [{ label: "Documentation Lua", url: "https://www.lua.org/manual/5.4/" }], tutorial: LUA_TUTO },
+  { icon: "🧩", name: "Mods & Exécutables", desc: "Exécutables de mods, patches et outils de modding pour jeux PC. Téléchargements directs via Mega.", tags: ["Mega", "Mods", "Patches"], links: [{ label: "Dossier Mega — Mods PC", url: "https://mega.nz/folder/SsIkWbBR#6lRkIDCfleuqEzRMYQY2uA", type: "mega" }], tutorial: `# ===== MODS & EXÉCUTABLES =====\n# Scanner chaque .exe avant exécution\n# ===== FIN =====` },
+  { icon: "⚡", name: "Scripts d'Automatisation", desc: "Scripts Lua/Bash prêts à l'emploi pour automatiser des tâches de modding et de patching.", tags: ["Lua", "Bash", "Auto"], links: [{ label: "Lua Forge", url: "https://github.com/lua/lua" }], tutorial: `# ===== SCRIPTS D'AUTOMATISATION =====\nwhile true do wait(1) end\n# ===== FIN =====` },
+  { icon: "🌐", name: "Outils Web & APIs", desc: "Outils d'analyse web et interfaces API pour le développement de scripts de reverse engineering.", tags: ["API", "Web", "JSON"], links: [{ label: "API Reference", url: "https://developer.mozilla.org/fr/" }], tutorial: `# ===== OUTILS WEB & APIS =====\nfetch('https://api.example.com/status')\n# ===== FIN =====` }
+];
+
+function stripHtmlFromCurrentUrl() {
+  if (/\.html$/i.test(window.location.pathname)) {
+    const clean = new URL(window.location.href);
+    clean.pathname = clean.pathname.replace(/\/[^/]*\.html$/i, "/");
+    window.history.replaceState({}, "", clean.toString());
+  }
+}
+
+function buildCardEl(item) {
+  const card = document.createElement("div");
+  card.className = "card";
+  card.innerHTML = `
+    <div class="card-title"><span>${item.icon}</span><span class="gold-text">${item.name}</span></div>
+    <div class="card-desc">${item.desc}</div>
+    <div style="margin-top:8px;">${(item.tags || []).map(t => `<span class="meta-tag">${t}</span>`).join(" ")}</div>
+  `;
+  card.addEventListener("click", () => showDetail(item));
+  return card;
+}
+
+function renderCards(remoteItems = []) {
+  const container = document.getElementById("content");
+  container.innerHTML = "";
+  if (remoteItems.length) {
+    const lbl = document.createElement("div");
+    lbl.className = "section-label";
+    lbl.textContent = "⚡ Ajouts automatiques (data/mods.json)";
+    container.appendChild(lbl);
+    const rGrid = document.createElement("div");
+    rGrid.className = "cards-grid";
+    remoteItems.forEach(item => rGrid.appendChild(buildCardEl(item)));
+    container.appendChild(rGrid);
+  }
+  const baseLbl = document.createElement("div");
+  baseLbl.className = "section-label";
+  baseLbl.textContent = "🔴 Modules Lua & Cheats";
+  container.appendChild(baseLbl);
+  const grid = document.createElement("div");
+  grid.className = "cards-grid";
+  CARDS.forEach(item => grid.appendChild(buildCardEl(item)));
+  container.appendChild(grid);
+}
+
+function showDetail(item) {
+  const panel = document.getElementById("rightPanel");
+  panel.classList.remove("collapsed");
+  const detail = document.getElementById("detailContent");
+  let linksHtml = "";
+  if (item.links && item.links.length) {
+    linksHtml = item.links.map(l => `<a href="${l.url}" target="_blank" rel="noopener noreferrer" class="link-btn ${l.type || ''}">${l.label} ↗</a>`).join("");
+  }
+  detail.innerHTML = `
+    <h3 class="detail-title gold-text">${item.icon} ${item.name}</h3>
+    <div class="detail-desc">${item.desc}</div>
+    <div class="detail-meta">${(item.tags || []).map(t => `<span class="meta-tag">${t}</span>`).join("")}</div>
+    ${item.tutorial ? `<div class="tutorial-content">${item.tutorial}</div>` : ""}
+    ${linksHtml}
+  `;
+  if (window.innerWidth < 900) panel.scrollIntoView({behavior:"smooth"});
+}
+
+function mapModItem(mod) {
+  const pub = mod.publication || {};
+  return {
+    icon: "⚡",
+    name: pub.titre || mod.jeu || mod.id || "Nouvelle entrée",
+    desc: mod.explication || "",
+    tags: [mod.categorie, mod.sous_categorie, mod.jeu, pub.type].filter(Boolean),
+    links: pub.lien ? [{ label: "Ouvrir la ressource", url: pub.lien, type: "mega" }] : [],
+    tutorial: [pub.date_ajout ? "# Date : " + pub.date_ajout : "", mod.wiki || ""].filter(Boolean).join("\n\n")
+  };
+}
+
+async function loadRemoteMods() {
+  renderCards([]);
+  try {
+    const res = await fetch("data/mods.json?t=" + Date.now());
+    if (!res.ok) return;
+    const data = await res.json();
+    const arr = Array.isArray(data) ? data : (data.mods || []);
+    const matched = arr.filter(m => /lua|cheat|mod|script|ios|rayan/i.test(`${m.categorie || ""} ${m.sous_categorie || ""}`));
+    renderCards((matched.length ? matched : arr).map(mapModItem));
+  } catch (e) {}
+}
+
+function renderPlaylist() {
+  const playlistContainer = document.getElementById("videoPlaylist");
+  playlistContainer.innerHTML = "";
+  VIDEOS.forEach((vid, index) => {
+    const thumb = document.createElement("div");
+    thumb.className = "video-thumb" + (index === 0 ? " active" : "");
+    thumb.innerHTML = `<span class="thumb-num">${index + 1}</span><span>${vid.title}</span>`;
+    thumb.addEventListener("click", () => {
+      document.getElementById("ytPlayer").src = `https://www.youtube.com/embed/${vid.id}`;
+      document.querySelectorAll(".video-thumb").forEach(t => t.classList.remove("active"));
+      thumb.classList.add("active");
+    });
+    playlistContainer.appendChild(thumb);
+  });
+
+  const playlistLink = document.createElement("a");
+  playlistLink.href = PLAYLIST_URL;
+  playlistLink.target = "_blank";
+  playlistLink.rel = "noopener noreferrer";
+  playlistLink.className = "playlist-link";
+  playlistLink.innerText = "📺 Playlist complète";
+  playlistContainer.appendChild(playlistLink);
+}
+
+document.querySelectorAll(".top-nav a, .sidebar a").forEach(a => {
+  a.addEventListener("click", (e) => {
+    const href = a.getAttribute("href");
+    if (href && href.endsWith(".html") && href !== "index.html") {
+      e.preventDefault();
+      window.history.pushState({}, "", href.replace(/\.html$/i, ""));
+      window.location.href = href;
+    }
+  });
+});
+document.getElementById("btnDiscordHeader")?.addEventListener("click", () => window.open("https://discord.gg/xzqhhXdH9j", "_blank"));
+document.getElementById("btnClose")?.addEventListener("click", () => { if (confirm("Fermer ?")) window.close(); });
+document.getElementById("btnCollapseRight")?.addEventListener("click", () => {
+  document.getElementById("rightPanel").classList.toggle("collapsed");
+});
+
+stripHtmlFromCurrentUrl();
+renderPlaylist();
+loadRemoteMods();
+</script>
+</body>
+</html>

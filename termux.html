@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Vaztoodix RE Studio — Termux</title>
+<meta name="description" content="Outils de reverse engineering sur Android : Radare2, Ghidra, Apktool, JADX.">
+<meta property="og:title" content="Vaztoodix RE Studio — Termux">
+<meta property="og:description" content="Outils de RE sur Android.">
+<meta property="og:image" content="https://nsvault.me/wp-content/uploads/2026/04/logo.png">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; font-family: 'Segoe UI', sans-serif; background: radial-gradient(circle at top left, #0a0a0f, #050508 60%, #020204); color: #e8e8f0; overflow: hidden; display: flex; flex-direction: column; }
+.gold-text { background: linear-gradient(135deg, #ffd700, #ffb300, #fff8b0, #ffb300, #b8860b); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; font-weight: bold; }
+.app-header { height: 52px; background: rgba(15,15,25,0.85); border-bottom: 1px solid rgba(255,215,0,0.3); display: flex; align-items: center; justify-content: space-between; padding: 0 14px; flex-shrink: 0; }
+.logo-area { display: flex; align-items: center; gap: 10px; }
+.logo { width: 36px; height: 36px; background: radial-gradient(circle, #ffd700, #b8860b); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 11px; color: #1a1a1a; flex-shrink: 0; }
+.app-title h1 { font-size: 14px; }
+.app-title .version { font-size: 10px; color: #888; }
+.header-actions { display: flex; gap: 6px; align-items: center; }
+.icon-btn { width: 32px; height: 32px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.2); border-radius: 8px; color: #e8e8f0; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+.discord-icon-btn { width: 32px; height: 32px; background: rgba(255,215,0,0.08); border: 1px solid rgba(255,215,0,0.45); border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; }
+.discord-icon-btn svg { width: 20px; height: 20px; }
+.discord-icon-btn svg path { fill: #ffd700; }
+.top-nav { background: rgba(15,15,25,0.85); border-bottom: 1px solid rgba(255,215,0,0.15); display: flex; align-items: center; gap: 4px; padding: 6px 14px; flex-shrink: 0; overflow-x: auto; }
+.top-nav::-webkit-scrollbar { display: none; }
+.top-nav a { flex-shrink: 0; font-size: 12px; padding: 6px 12px; border-radius: 7px; color: #b0b0c0; text-decoration: none; white-space: nowrap; }
+.top-nav a:hover { background: rgba(255,215,0,0.08); color: #ffd700; }
+.top-nav a.active { background: linear-gradient(135deg, #ffd700, #b8860b); color: #1a1a1a; font-weight: bold; }
+.app-main { flex: 1; display: flex; gap: 8px; padding: 8px; overflow: hidden; min-height: 0; }
+.sidebar { width: 52px; background: rgba(15,15,25,0.7); border: 1px solid rgba(255,215,0,0.15); border-radius: 12px; display: flex; flex-direction: column; align-items: center; padding: 8px 0; gap: 6px; flex-shrink: 0; overflow-y: auto; }
+.nav-btn { width: 38px; height: 38px; background: rgba(40,40,60,0.6); border: 1px solid rgba(255,215,0,0.1); border-radius: 9px; font-size: 16px; cursor: pointer; color: #e8e8f0; display: flex; align-items: center; justify-content: center; text-decoration: none; flex-shrink: 0; }
+.nav-btn.active { background: linear-gradient(135deg, #ffd700, #b8860b); color: #1a1a1a; border-color: #fff8b0; }
+.center-panel { flex: 1; display: flex; flex-direction: column; gap: 8px; min-width: 0; min-height: 0; }
+.panel-header { background: rgba(15,15,25,0.7); border: 1px solid rgba(255,215,0,0.15); border-radius: 12px; padding: 10px 14px; flex-shrink: 0; }
+.panel-header h2 { font-size: 15px; margin-bottom: 2px; }
+.panel-header p { font-size: 11px; color: #999; }
+.section-label { font-size: 12px; margin: 10px 0 8px; color: #ffd700; font-weight: bold; }
+.panel-content { flex: 1; overflow-y: auto; padding: 4px; border-radius: 12px; min-height: 0; }
+.panel-content::-webkit-scrollbar { width: 6px; }
+.panel-content::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #ffd700, #b8860b); border-radius: 3px; }
+.cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; padding-bottom: 20px; }
+.card { background: rgba(25,25,40,0.8); border: 1px solid rgba(255,215,0,0.15); border-radius: 10px; padding: 12px 14px; cursor: pointer; min-height: 90px; display: block; user-select: none; transition: 0.2s; }
+.card:hover { border-color: rgba(255,215,0,0.4); box-shadow: 0 0 16px rgba(255,215,0,0.15); }
+.card:active { transform: scale(0.98); }
+.card-title { font-size: 13px; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+.card-desc { font-size: 11px; color: #a0a0b0; line-height: 1.5; }
+.meta-tag { background: rgba(255,215,0,0.1); border: 1px solid rgba(255,215,0,0.3); border-radius: 6px; padding: 4px 10px; color: #ffd700; font-size: 11px; }
+.right-panel { width: 42%; min-width: 320px; background: rgba(15,15,25,0.75); border: 1px solid rgba(255,215,0,0.2); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; min-height: 0; }
+.right-panel.collapsed { width: 48px; min-width: 48px; padding: 6px 4px; }
+.right-panel.collapsed .detail-content { display: none; }
+.right-header { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: bold; flex-shrink: 0; }
+.detail-content { display: flex; flex-direction: column; gap: 10px; flex: 1; min-height: 0; }
+.detail-title { font-size: 16px; margin-bottom: 4px; }
+.detail-desc { font-size: 12px; color: #b0b0c0; line-height: 1.6; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 8px; border-left: 3px solid #ffd700; }
+.detail-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 11px; }
+.tutorial-content { font-family: 'Consolas', 'Monaco', monospace; font-size: 11px; line-height: 1.7; background: rgba(0,0,0,0.5); border-radius: 8px; padding: 12px; border: 1px solid rgba(255,215,0,0.15); white-space: pre-wrap; color: #c0c0d0; overflow-x: auto; }
+.tutorial-content .comment { color: #6a6a80; font-style: italic; }
+.tutorial-content .cmd { color: #50dc78; font-weight: bold; }
+.link-btn { width: 100%; height: 34px; font-size: 12px; border-radius: 7px; cursor: pointer; border: 1px solid rgba(255,215,0,0.3); background: rgba(255,215,0,0.1); color: #ffd700; margin-bottom: 6px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+@media (max-width: 900px) { .app-main { flex-direction: column; padding: 4px; } .sidebar { width: 100%; height: 50px; flex-direction: row; padding: 6px; overflow-x: auto; overflow-y: hidden; } .nav-btn { width: 36px; height: 36px; } .right-panel { width: 100%; min-width: unset; height: 45vh; } .right-panel.collapsed { height: 48px; width: 100%; min-width: unset; } .cards-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); } }
+@media (max-width: 500px) { .cards-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="logo-area">
+    <div class="logo">RE</div>
+    <div class="app-title">
+      <h1 class="gold-text">Vaztoodix RE Studio</h1>
+      <span class="version">v2.1 — Termux</span>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="discord-icon-btn" id="btnDiscordHeader"><svg viewBox="0 0 127.14 96.36"><path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/></svg></button>
+    <button class="icon-btn" id="btnClose">✕</button>
+  </div>
+</header>
+
+<nav class="top-nav">
+  <a href="index.html">🏠 Accueil</a>
+  <a href="mods.html">🟣 Mods & APK</a>
+  <a href="outils.html">🔧 Outils</a>
+  <a href="switch.html">🏴‍☠️ Pirate</a>
+  <a href="lua-cheats.html">🎮 Lua & Cheats</a>
+  <a href="termux.html" class="active">📱 Termux</a>
+  <a href="linux.html">🐧 Linux</a>
+  <a href="ia.html">🤖 IA</a>
+  <a href="ides.html">💻 IDEs</a>
+</nav>
+
+<main class="app-main">
+  <aside class="sidebar">
+    <a href="index.html" class="nav-btn">🏠</a>
+    <a href="switch.html" class="nav-btn">🏴‍☠️</a>
+    <a href="lua-cheats.html" class="nav-btn">🔴</a>
+    <a href="mods.html" class="nav-btn">🟣</a>
+    <a href="termux.html" class="nav-btn active">📱</a>
+    <a href="linux.html" class="nav-btn">🐧</a>
+    <a href="ia.html" class="nav-btn">🤖</a>
+    <a href="ides.html" class="nav-btn">💻</a>
+  </aside>
+
+  <section class="center-panel">
+    <div class="panel-header">
+      <h2 class="gold-text">📱 Termux (Android)</h2>
+      <p>Radare2, Ghidra, Apktool, JADX — outils de RE sur Android.</p>
+    </div>
+    <div class="panel-content" id="content"></div>
+  </section>
+
+  <aside class="right-panel" id="rightPanel">
+    <div class="right-header">
+      <span class="gold-text">📖 Détails</span>
+      <button class="icon-btn" id="btnCollapseRight" style="width:24px;height:24px;font-size:11px;">◧</button>
+    </div>
+    <div class="detail-content" id="detailContent">
+      <p style="font-size:12px;color:#888;text-align:center;padding:20px 0;">👈 Clique sur une carte.</p>
+    </div>
+  </aside>
+</main>
+
+<script>
+const CARDS = [
+  { icon:"🔧", name:"Radare2", desc:"Suite d'outils CLI pour analyser des binaires. Fonctionne sur Termux sans proot.", tags:["radare2","rabin2","CLI"], links:[{label:"Site officiel Radare2",url:"https://rada.re/n/"}],
+    tutorial:`# ===== RADARE2 SUR TERMUX =====\npkg update && pkg upgrade -y\npkg install radare2 -y\nr2 -A libtarget.so\n[0x0]> aaa\n[0x0]> afl\n[0x0]> pdf @ main\n[0x0]> q\nr2pm update\nr2pm install r2ghidra\n# ===== FIN =====` },
+  { icon:"🔬", name:"Ghidra (proot)", desc:"Ghidra de la NSA installé via proot-distro Ubuntu sur Android.", tags:["proot-distro","Ghidra","Java"], links:[{label:"Ghidra GitHub",url:"https://github.com/NationalSecurityAgency/ghidra"}],
+    tutorial:`# ===== GHIDRA SUR TERMUX =====\npkg install proot-distro -y\nproot-distro install ubuntu\nproot-distro login ubuntu\napt update && apt install openjdk-17-jdk wget unzip -y\ncd /opt\nwget https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_11.0.3_build/ghidra_11.0.3_PUBLIC_20240410.zip\nunzip ghidra_11.0.3_PUBLIC_20240410.zip\n./ghidra/support/analyzeHeadless /root/projets P -import libtarget.so\n# ===== FIN =====` },
+  { icon:"📦", name:"Apktool", desc:"Décompiler/recompiler les APK Android en ressources lisibles (XML, smali).", tags:["apktool","keytool","apksigner"], links:[{label:"Apktool officiel",url:"https://apktool.org/"}],
+    tutorial:`# ===== APKTOOL SUR TERMUX =====\npkg install wget openjdk-17 -y\nwget https://github.com/Termux-Apktool/apktool/releases/download/v2.3.4/apktool_2.3.4_all.deb\ndpkg -i apktool_2.3.4_all.deb\napktool d monapp.apk\nfind monapp/lib -name "*.so"\napktool b monapp -o modded.apk\napksigner sign --ks ma-cle.keystore modded.apk\n# ===== FIN =====` },
+  { icon:"☕", name:"JADX", desc:"Décompilateur DEX vers Java. Bien plus lisible que le smali.", tags:["JADX","Java","proot"], links:[{label:"JADX GitHub",url:"https://github.com/skylot/jadx"}],
+    tutorial:`# ===== JADX SUR TERMUX =====\npkg install proot-distro -y\nproot-distro install ubuntu\nproot-distro login ubuntu\napt install openjdk-17-jdk unzip wget -y\ncd /opt\nwget https://github.com/skylot/jadx/releases/download/v1.5.0/jadx-1.5.0.zip\nunzip jadx-1.5.0.zip -d jadx\ncd jadx/bin\n./jadx monapp.apk\n./jadx-gui monapp.apk\n# ===== FIN =====` }
+];
+
+function stripHtmlFromCurrentUrl() {
+  if (/\.html$/i.test(window.location.pathname)) {
+    const clean = new URL(window.location.href);
+    clean.pathname = clean.pathname.replace(/\/[^/]*\.html$/i, "/");
+    window.history.replaceState({}, "", clean.toString());
+  }
+}
+
+function buildCardEl(item) {
+  const card = document.createElement("div");
+  card.className = "card";
+  card.innerHTML = `<div class="card-title"><span>${item.icon}</span><span class="gold-text">${item.name}</span></div>
+    <div class="card-desc">${item.desc}</div>
+    <div class="detail-meta" style="margin-top:8px;">${(item.tags || []).slice(0,3).map(t=>`<span class="meta-tag">${t}</span>`).join("")}</div>`;
+  card.onclick = () => showDetail(item);
+  return card;
+}
+
+function renderCards(remoteItems = []) {
+  const container = document.getElementById("content");
+  container.innerHTML = "";
+  if (remoteItems.length) {
+    const lbl = document.createElement("div");
+    lbl.className = "section-label";
+    lbl.textContent = "⚡ Ajouts automatiques (data/mods.json)";
+    container.appendChild(lbl);
+    const rGrid = document.createElement("div");
+    rGrid.className = "cards-grid";
+    remoteItems.forEach(item => rGrid.appendChild(buildCardEl(item)));
+    container.appendChild(rGrid);
+  }
+  const baseLbl = document.createElement("div");
+  baseLbl.className = "section-label";
+  baseLbl.textContent = "📱 Outils Termux";
+  container.appendChild(baseLbl);
+  const grid = document.createElement("div");
+  grid.className = "cards-grid";
+  CARDS.forEach(c => grid.appendChild(buildCardEl(c)));
+  container.appendChild(grid);
+}
+
+function showDetail(item) {
+  const panel = document.getElementById("rightPanel");
+  panel.classList.remove("collapsed");
+  let html = `<div class="detail-title gold-text">${item.icon} ${item.name}</div>
+    <div class="detail-desc">${item.desc}</div>
+    <div class="detail-meta">${(item.tags || []).map(t=>`<span class="meta-tag">${t}</span>`).join("")}</div>`;
+  if (item.links && item.links.length) {
+    html += `<div style="margin-top:12px;"><div class="gold-text" style="font-size:12px;margin-bottom:6px;">🔗 Liens</div>
+      ${item.links.map(l=>`<button class="link-btn" onclick="window.open('${l.url}','_blank','noopener,noreferrer')">${l.label} ↗</button>`).join("")}</div>`;
+  }
+  if (item.tutorial) {
+    html += `<div style="margin-top:12px;"><div class="gold-text" style="font-size:12px;margin-bottom:6px;">📋 Tutoriel / Wiki</div>
+      <div class="tutorial-content">${formatTuto(item.tutorial)}</div></div>`;
+  }
+  document.getElementById("detailContent").innerHTML = html;
+  if (window.innerWidth < 900) panel.scrollIntoView({behavior:"smooth"});
+}
+
+function formatTuto(text) {
+  return text.replace(/&/g,"&").replace(/</g,"<").replace(/>/g,">")
+    .replace(/^(#.*)$/gm,'<span class="comment">$1</span>')
+    .replace(/(pkg install|apt install|wget|unzip|cd |dpkg -i|apktool|apksigner|r2pm|proot-distro)/g,'<span class="cmd">$1</span>');
+}
+
+function mapModItem(mod) {
+  const pub = mod.publication || {};
+  return {
+    icon: "⚡",
+    name: pub.titre || mod.jeu || mod.id || "Nouvelle entrée",
+    desc: mod.explication || "",
+    tags: [mod.categorie, mod.sous_categorie, mod.jeu, pub.type].filter(Boolean),
+    links: pub.lien ? [{ label: "Ouvrir la ressource", url: pub.lien }] : [],
+    tutorial: [pub.date_ajout ? "# Date : " + pub.date_ajout : "", mod.wiki || ""].filter(Boolean).join("\n\n")
+  };
+}
+
+async function loadRemoteMods() {
+  renderCards([]);
+  try {
+    const res = await fetch("data/mods.json?t=" + Date.now());
+    if (!res.ok) return;
+    const data = await res.json();
+    const arr = Array.isArray(data) ? data : (data.mods || []);
+    const matched = arr.filter(m => /termux|android|arm64|apk/i.test(`${m.categorie || ""} ${m.sous_categorie || ""}`));
+    renderCards((matched.length ? matched : arr).map(mapModItem));
+  } catch (e) {}
+}
+
+document.querySelectorAll(".top-nav a, .sidebar a").forEach(a => {
+  a.addEventListener("click", (e) => {
+    const href = a.getAttribute("href");
+    if (href && href.endsWith(".html") && href !== "index.html") {
+      e.preventDefault();
+      window.history.pushState({}, "", href.replace(/\.html$/i, ""));
+      window.location.href = href;
+    }
+  });
+});
+document.getElementById("btnDiscordHeader")?.addEventListener("click", () => window.open("https://discord.gg/xzqhhXdH9j","_blank"));
+document.getElementById("btnClose")?.addEventListener("click", () => { if (confirm("Fermer ?")) window.close(); });
+document.getElementById("btnCollapseRight")?.addEventListener("click", () => document.getElementById("rightPanel").classList.toggle("collapsed"));
+
+stripHtmlFromCurrentUrl();
+loadRemoteMods();
+</script>
+</body>
+</html>
