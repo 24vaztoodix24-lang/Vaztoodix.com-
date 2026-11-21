@@ -15,7 +15,7 @@ html, body { height: 100%; font-family: 'Segoe UI', -apple-system, BlinkMacSyste
 .gold-text { background: linear-gradient(135deg, #ffd700 0%, #ffb300 25%, #fff8b0 50%, #ffb300 75%, #b8860b 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; font-weight: bold; }
 .app-header { height: 52px; background: rgba(15, 15, 25, 0.85); border-bottom: 1px solid rgba(255, 215, 0, 0.3); display: flex; align-items: center; justify-content: space-between; padding: 0 14px; z-index: 100; flex-shrink: 0; }
 .logo-area { display: flex; align-items: center; gap: 10px; }
-.logo { width: 36px; height: 36px; background: radial-gradient(circle, #ffd700, #b8860b); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 11px; color: #1a1a1a; }
+.logo { width: 36px; height: 36px; background: radial-gradient(circle, #ffd700, #b8860b); border-radius: 8px; display: flex; align-items: justify-content: center; font-weight: bold; font-size: 11px; color: #1a1a1a; }
 .app-title h1 { font-size: 14px; }
 .app-title .version { font-size: 10px; color: #888; }
 .header-actions { display: flex; gap: 6px; align-items: center; }
@@ -39,6 +39,11 @@ html, body { height: 100%; font-family: 'Segoe UI', -apple-system, BlinkMacSyste
 .panel-header { background: rgba(15, 15, 25, 0.7); border: 1px solid rgba(255, 215, 0, 0.15); border-radius: 12px; padding: 10px 14px; flex-shrink: 0; }
 .panel-header h2 { font-size: 15px; margin-bottom: 2px; }
 .panel-header p { font-size: 11px; color: #999; }
+.filter-bar { display: flex; flex-wrap: wrap; gap: 6px; padding: 2px 4px; flex-shrink: 0; }
+.filter-btn { font-size: 11px; padding: 5px 10px; border-radius: 7px; border: 1px solid rgba(255, 215, 0, 0.25); background: rgba(25, 25, 40, 0.8); color: #d0d0e0; cursor: pointer; transition: 0.2s; }
+.filter-btn:hover { border-color: #ffd700; color: #ffd700; }
+.filter-btn.active { background: linear-gradient(135deg, #ffd700, #b8860b); color: #1a1a1a; border-color: #fff8b0; font-weight: bold; }
+.section-label { font-size: 12px; margin: 10px 0 8px; color: #ffd700; font-weight: bold; }
 .panel-content { flex: 1; overflow-y: auto; padding: 4px; border-radius: 12px; min-height: 0; }
 .panel-content::-webkit-scrollbar { width: 6px; }
 .panel-content::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #ffd700, #b8860b); border-radius: 3px; }
@@ -88,7 +93,7 @@ html, body { height: 100%; font-family: 'Segoe UI', -apple-system, BlinkMacSyste
     <div class="logo">RE</div>
     <div class="app-title">
       <h1 class="gold-text">Vaztoodix RE Studio</h1>
-      <span class="version">v2.0 — Multi-Pages Interactif</span>
+      <span class="version">v2.1 — Multi-Pages & Auto-Index</span>
     </div>
   </div>
   <div class="header-actions">
@@ -124,8 +129,9 @@ html, body { height: 100%; font-family: 'Segoe UI', -apple-system, BlinkMacSyste
   <section class="center-panel">
     <div class="panel-header">
       <h2 class="gold-text">🏠 Accueil</h2>
-      <p>Clique sur une section. Les détails s'affichent à droite.</p>
+      <p>Clique sur une carte ou filtre par catégorie sans .html dans l'URL. Les détails s'affichent à droite.</p>
     </div>
+    <div class="filter-bar" id="categoryFilters"></div>
     <div class="panel-content" id="content"></div>
   </section>
 
@@ -142,31 +148,126 @@ html, body { height: 100%; font-family: 'Segoe UI', -apple-system, BlinkMacSyste
 
 <script>
 const HOME_CARDS = [
-  { icon:"🏴‍☠️", name:"Switch Games", desc:"Jeux Switch NSP/XCI avec liens share.zip directs.", tags:["NSP","XCI","share.zip"], links:[{label:"Voir la page Switch",url:"switch.html",type:"sharezip"}], tutorial:"Ouvre la page Switch pour voir les 7 jeux avec leurs liens share.zip directs." },
-  { icon:"🔴", name:"IOS / Modding Rayan", desc:"Scripts Lua, injection DLL, cheats Fortnite, V-Bucks.", tags:["Lua","DLL","Fortnite"], links:[{label:"Voir la page Lua & Cheats",url:"lua-cheats.html",type:"mega"}], tutorial:"Ouvre la page Lua & Cheats pour le tutoriel complet." },
-  { icon:"🟣", name:"Mods & APK", desc:"APK, Smali, binaires Windows.", tags:["Apktool","JADX","PE"], links:[{label:"Voir la page Mods",url:"mods.html",type:"mega"}], tutorial:"Ouvre la page Mods pour APK et binaires Windows." },
-  { icon:"🔧", name:"Outils RE", desc:"Ghidra, Radare2, Binutils, OpenBin, LLM4Decompile.", tags:["Ghidra","Radare2","Binutils"], links:[{label:"Voir la page Outils",url:"outils.html",type:"mega"}], tutorial:"Ouvre la page Outils pour les outils RE." },
-  { icon:"📱", name:"Termux", desc:"Outils de RE sur Android.", tags:["Radare2","Ghidra","Apktool"], links:[{label:"Voir Termux",url:"termux.html",type:"mega"}], tutorial:"Ouvre Termux pour les outils Android." },
-  { icon:"🐧", name:"Linux", desc:"Analyse de binaires sur Linux.", tags:["ELF","Ghidra","Radare2"], links:[{label:"Voir Linux",url:"linux.html",type:"mega"}], tutorial:"Ouvre Linux pour les outils d'analyse ELF." },
-  { icon:"🤖", name:"IA & MCP", desc:"REA, GhidraMCP, BetterDecompiler.", tags:["MCP","Claude","Ghidra"], links:[{label:"Voir IA",url:"ia.html",type:"mega"}], tutorial:"Ouvre IA pour les outils IA." },
-  { icon:"💻", name:"IDEs", desc:"Claude Code, VS Code, Cursor.", tags:["Claude","VSCode","Cursor"], links:[{label:"Voir IDEs",url:"ides.html",type:"mega"}], tutorial:"Ouvre IDEs pour les IDE recommandés." }
+  { icon:"🏴‍☠️", name:"Switch Games", category:"Switch", desc:"Jeux Switch NSP/XCI avec liens share.zip directs.", tags:["NSP","XCI","share.zip"], links:[{label:"Voir la page Switch",url:"switch.html",type:"sharezip"}], tutorial:"Ouvre la page Switch pour voir les 7 jeux avec leurs liens share.zip directs." },
+  { icon:"🔴", name:"IOS / Modding Rayan", category:"Lua & Cheats", desc:"Scripts Lua, injection DLL, cheats Fortnite, V-Bucks.", tags:["Lua","DLL","Fortnite"], links:[{label:"Voir la page Lua & Cheats",url:"lua-cheats.html",type:"mega"}], tutorial:"Ouvre la page Lua & Cheats pour le tutoriel complet." },
+  { icon:"🟣", name:"Mods & APK", category:"Mods & APK", desc:"APK, Smali, binaires Windows.", tags:["Apktool","JADX","PE"], links:[{label:"Voir la page Mods",url:"mods.html",type:"mega"}], tutorial:"Ouvre la page Mods pour APK et binaires Windows." },
+  { icon:"🔧", name:"Outils RE", category:"Outils", desc:"Ghidra, Radare2, Binutils, OpenBin, LLM4Decompile.", tags:["Ghidra","Radare2","Binutils"], links:[{label:"Voir la page Outils",url:"outils.html",type:"mega"}], tutorial:"Ouvre la page Outils pour les outils RE." },
+  { icon:"📱", name:"Termux", category:"Termux", desc:"Outils de RE sur Android.", tags:["Radare2","Ghidra","Apktool"], links:[{label:"Voir Termux",url:"termux.html",type:"mega"}], tutorial:"Ouvre Termux pour les outils Android." },
+  { icon:"🐧", name:"Linux", category:"Linux", desc:"Analyse de binaires sur Linux.", tags:["ELF","Ghidra","Radare2"], links:[{label:"Voir Linux",url:"linux.html",type:"mega"}], tutorial:"Ouvre Linux pour les outils d'analyse ELF." },
+  { icon:"🤖", name:"IA & MCP", category:"IA", desc:"REA, GhidraMCP, BetterDecompiler.", tags:["MCP","Claude","Ghidra"], links:[{label:"Voir IA",url:"ia.html",type:"mega"}], tutorial:"Ouvre IA pour les outils IA." },
+  { icon:"💻", name:"IDEs", category:"IDEs", desc:"Claude Code, VS Code, Cursor.", tags:["Claude","VSCode","Cursor"], links:[{label:"Voir IDEs",url:"ides.html",type:"mega"}], tutorial:"Ouvre IDEs pour les IDE recommandés." }
 ];
 
-function renderCards() {
+let remoteMods = [];
+
+function getActiveCategoryFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  return (params.get("cat") || "Toutes").trim();
+}
+
+function setCleanCategoryUrl(catName) {
+  const url = new URL(window.location.href);
+  url.pathname = url.pathname.replace(/\/[^/]*\.html$/, "/");
+  if (!catName || catName.toLowerCase() === "toutes") {
+    url.searchParams.delete("cat");
+  } else {
+    url.searchParams.set("cat", catName);
+  }
+  window.history.pushState({ cat: catName }, "", url.toString());
+  renderAll();
+}
+
+function mapModToCardItem(mod) {
+  const pub = mod.publication || {};
+  const tags = [mod.categorie, mod.sous_categorie, mod.jeu, pub.type].filter(Boolean);
+  const links = pub.lien
+    ? [{ label: "Ouvrir la ressource (" + (pub.titre || mod.jeu || "Lien") + ")", url: pub.lien, type: "sharezip", external: true }]
+    : [];
+  const tutorialParts = [];
+  if (pub.date_ajout) tutorialParts.push("# Date d'ajout : " + pub.date_ajout);
+  if (mod.wiki) tutorialParts.push(mod.wiki);
+  return {
+    icon: "⚡",
+    name: pub.titre || mod.jeu || mod.id || "Nouvelle entrée",
+    category: mod.categorie || "Divers",
+    desc: mod.explication || "Entrée ajoutée automatiquement via data/mods.json.",
+    tags,
+    links,
+    tutorial: tutorialParts.join("\n\n") || "Ajouté automatiquement depuis data/mods.json."
+  };
+}
+
+function renderCategoryFilters() {
+  const filterBar = document.getElementById("categoryFilters");
+  if (!filterBar) return;
+  const activeCat = getActiveCategoryFromUrl();
+  const dynamicCats = remoteMods.map(m => m.categorie).filter(Boolean);
+  const baseCats = HOME_CARDS.map(c => c.category).filter(Boolean);
+  const allCats = ["Toutes", ...Array.from(new Set([...dynamicCats, ...baseCats]))];
+
+  filterBar.innerHTML = "";
+  allCats.forEach(cat => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "filter-btn" + (cat.toLowerCase() === activeCat.toLowerCase() ? " active" : "");
+    btn.textContent = cat;
+    btn.onclick = () => setCleanCategoryUrl(cat);
+    filterBar.appendChild(btn);
+  });
+}
+
+function createCardElement(item) {
+  const card = document.createElement("div");
+  card.className = "card";
+  card.innerHTML = `<div class="card-title"><span>${item.icon}</span><span class="gold-text">${item.name}</span></div>
+    <div class="card-desc">${item.desc}</div>
+    <div class="detail-meta" style="margin-top:8px;">${item.tags.map(t => `<span class="meta-tag">${t}</span>`).join("")}</div>`;
+  card.onclick = () => showDetail(item);
+  return card;
+}
+
+function renderAll() {
+  renderCategoryFilters();
+  const activeCat = getActiveCategoryFromUrl();
   const container = document.getElementById("content");
   container.innerHTML = "";
-  const grid = document.createElement("div");
-  grid.className = "cards-grid";
-  HOME_CARDS.forEach((c, i) => {
-    const card = document.createElement("div");
-    card.className = "card";
-    card.innerHTML = `<div class="card-title"><span>${c.icon}</span><span class="gold-text">${c.name}</span></div>
-      <div class="card-desc">${c.desc}</div>
-      <div class="detail-meta" style="margin-top:8px;">${c.tags.map(t=>`<span class="meta-tag">${t}</span>`).join("")}</div>`;
-    card.onclick = () => showDetail(c);
-    grid.appendChild(card);
-  });
-  container.appendChild(grid);
+
+  const mappedMods = remoteMods.map(mapModToCardItem);
+  const filteredMods = activeCat.toLowerCase() === "toutes"
+    ? mappedMods
+    : mappedMods.filter(m => (m.category || "").toLowerCase() === activeCat.toLowerCase());
+
+  const filteredHome = activeCat.toLowerCase() === "toutes"
+    ? HOME_CARDS
+    : HOME_CARDS.filter(c => (c.category || "").toLowerCase() === activeCat.toLowerCase());
+
+  if (filteredMods.length > 0) {
+    const modsTitle = document.createElement("div");
+    modsTitle.className = "section-label";
+    modsTitle.textContent = `⚡ Ajouts automatiques (data/mods.json) — ${activeCat}`;
+    container.appendChild(modsTitle);
+
+    const modsGrid = document.createElement("div");
+    modsGrid.className = "cards-grid";
+    filteredMods.forEach(item => modsGrid.appendChild(createCardElement(item)));
+    container.appendChild(modsGrid);
+  }
+
+  if (filteredHome.length > 0) {
+    const homeTitle = document.createElement("div");
+    homeTitle.className = "section-label";
+    homeTitle.textContent = `🏠 Sections principales — ${activeCat}`;
+    container.appendChild(homeTitle);
+
+    const homeGrid = document.createElement("div");
+    homeGrid.className = "cards-grid";
+    filteredHome.forEach(item => homeGrid.appendChild(createCardElement(item)));
+    container.appendChild(homeGrid);
+  }
+
+  if (filteredMods.length === 0 && filteredHome.length === 0) {
+    container.innerHTML = `<p style="font-size:12px;color:#888;padding:16px;">Aucun élément dans la catégorie "${activeCat}".</p>`;
+  }
 }
 
 function showDetail(item) {
@@ -174,24 +275,43 @@ function showDetail(item) {
   panel.classList.remove("collapsed");
   const html = `<div class="detail-title gold-text">${item.icon} ${item.name}</div>
     <div class="detail-desc">${item.desc}</div>
-    <div class="detail-meta">${item.tags.map(t=>`<span class="meta-tag">${t}</span>`).join("")}</div>
+    <div class="detail-meta">${item.tags.map(t => `<span class="meta-tag">${t}</span>`).join("")}</div>
     <div style="margin-top:12px;">
       <div class="gold-text" style="font-size:12px;margin-bottom:6px;">🔗 Accès</div>
-      ${item.links.map(l=>`<button class="link-btn ${l.type}" onclick="window.location.href='${l.url}'">${l.label} ↗</button>`).join("")}
+      ${item.links.map(l => {
+        const action = l.external
+          ? `window.open('${l.url}','_blank','noopener,noreferrer')`
+          : `window.location.href='${l.url}'`;
+        return `<button class="link-btn ${l.type}" onclick="${action}">${l.label} ↗</button>`;
+      }).join("")}
     </div>
     <div style="margin-top:12px;">
-      <div class="gold-text" style="font-size:12px;margin-bottom:6px;">📋 Info</div>
-      <div class="tutorial-content">${item.tutorial.replace(/#(.+)/g,'<span class="comment">#$1</span>')}</div>
+      <div class="gold-text" style="font-size:12px;margin-bottom:6px;">📋 Info / Wiki</div>
+      <div class="tutorial-content">${item.tutorial.replace(/#(.+)/g, '<span class="comment">#$1</span>')}</div>
     </div>`;
   document.getElementById("detailContent").innerHTML = html;
-  if (window.innerWidth < 900) panel.scrollIntoView({behavior:"smooth"});
+  if (window.innerWidth < 900) panel.scrollIntoView({ behavior: "smooth" });
+}
+
+async function loadModsJson() {
+  try {
+    const res = await fetch("data/mods.json?t=" + Date.now());
+    if (!res.ok) return;
+    const data = await res.json();
+    remoteMods = Array.isArray(data) ? data : (data.mods || []);
+  } catch (e) {
+    console.warn("Impossible de charger data/mods.json :", e);
+    }
+  renderAll();
 }
 
 document.getElementById("btnDiscordHeader")?.addEventListener("click", () => window.open("https://discord.gg/xzqhhXdH9j", "_blank"));
 document.getElementById("btnClose")?.addEventListener("click", () => { if (confirm("Fermer ?")) window.close(); });
 document.getElementById("btnCollapseRight")?.addEventListener("click", () => document.getElementById("rightPanel").classList.toggle("collapsed"));
+window.addEventListener("popstate", renderAll);
 
-renderCards();
+renderAll();
+loadModsJson();
 </script>
 </body>
 </html>
