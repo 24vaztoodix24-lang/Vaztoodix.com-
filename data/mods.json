@@ -1,32 +1,36 @@
 {
+  "categories": [
+    "Pirate",
+    "Mods & APK",
+    "Outils RE",
+    "Lua & Cheats",
+    "Termux",
+    "Linux",
+    "IA & MCP",
+    "IDEs",
+    "404"
+  ],
   "mods": [
     {
-      "id": "switch-mk8dx-example-mod",
-      "categorie": "Switch",
-      "sous_categorie": "Jeux",
-      "jeu": "Mario Kart 8 Deluxe",
+      "id": "jeux-recomp-pc-android-ios-linux--6682",
+      "categorie": "Pirate",
+      "sous_categorie": "",
+      "jeu": "Nintendo / PlayStation / Xbox /",
+      "explication": "AllRecomps est un catalogue indépendant et gratuit qui recense les ports natifs et recompilations de jeux classiques de console pour PC. Le site agit comme une bibliothèque indexée plutôt qu'un site de téléchargement direct, fournissant des fiches détaillées pour chacun des 149 projets (chiffres de 2026) listés.",
+      "wiki": "",
+      "tags": [
+        "Pirate",
+        "Nintendo / PlayStation / Xbox /",
+        "Exe",
+        "Apk",
+        "IPA"
+      ],
       "publication": {
-        "titre": "Exemple de publication sur Mario Kart 8 Deluxe",
-        "lien": "https://exemple.com/lien-du-mod",
-        "type": "Mod",
-        "date_ajout": "2026-11-20"
-      },
-      "explication": "Explication claire du mod : ce qu'il modifie en jeu, comment il fonctionne et ce qu'il faut savoir avant de l'installer.",
-      "wiki": "Infos wiki : présentation du mod et de Mario Kart 8 Deluxe, compatibilité, versions et détails de référence."
-    },
-    {
-      "id": "recomplauncher-pc-tools",
-      "categorie": "PC",
-      "sous_categorie": "Tools",
-      "jeu": "RecompLauncher",
-      "publication": {
-        "titre": "RecompLauncher – Plateforme de jeux recompilés pour PC",
-        "lien": "https://recomplauncher.com/?lang=fr",
-        "type": "Mod",
-        "date_ajout": "2026-11-20"
-      },
-      "explication": "RecompLauncher est un outil open‑source qui permet d’exécuter des jeux recompilés (recomps) nativement sous Windows, Linux et macOS. Le site propose un catalogue de dizaines de titres, principalement des classiques de consoles Nintendo, PlayStation et autres, convertis pour fonctionner sur PC. L’utilisateur apporte ses propres copies de jeux, le launcher les installe, les met à jour et les lance sans besoin de compte ni de fichiers supplémentaires. Le service inclut également un magasin (RecompStore) et un hub développeur pour soumettre de nouveaux recompilations ou applications.",
-      "wiki": "RecompLauncher fonctionne comme un front‑end de gestion de jeux recompilés. Il ne fournit pas les ROMs ou les fichiers originaux, mais assure la compatibilité avec les versions PC des jeux grâce à des builds spécifiques. La plateforme supporte les systèmes d’exploitation Windows, Linux et macOS, et propose une version pour PS5 (RecompStore). Le projet est communautaire, avec un Discord dédié et une documentation détaillée sur le processus de recompilation. Il s’inscrit dans la catégorie PC > Tools, sous le jeu/repo \"RecompLauncher\"."
+        "titre": "Jeux Recomp (PC, Android, IOS,Linux..)",
+        "type": "Exe",
+        "lien": "https://allrecomps.com/",
+        "date_ajout": "2026-11-22"
+      }
     }
   ]
 }
