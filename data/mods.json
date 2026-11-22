@@ -10,5 +10,30 @@
     "IDEs",
     "404"
   ],
-  "mods": []
+  "mods": [
+    {
+      "id": "jeux-recomp-pc-android-ios-linux--1860",
+      "categorie": "Pirate",
+      "sous_categorie": "",
+      "jeu": "Tout type Jeux",
+      "explication": "AllRecomps est un catalogue indépendant et gratuit qui recense les ports natifs et recompilations de jeux classiques de console pour PC. Le site agit comme une bibliothèque indexée plutôt qu'un site de téléchargement direct, fournissant des fiches détaillées pour chacun des 149 projets (chiffres de 2026) listés.",
+      "wiki": "",
+      "tags": [
+        "Pirate",
+        "Tout type Jeux",
+        "Nintendo",
+        "PlayStation",
+        "Xbox",
+        "Exe",
+        "Apk",
+        "IPA"
+      ],
+      "publication": {
+        "titre": "Jeux Recomp (PC, Android, IOS,Linux..)",
+        "type": "Nintendo",
+        "lien": "https://allrecomps.com/",
+        "date_ajout": "2026-11-22"
+      }
+    }
+  ]
 }
