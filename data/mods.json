@@ -12,6 +12,27 @@
   ],
   "mods": [
     {
+      "id": "jeux-recomp-pc-android-ios-linux--1566",
+      "categorie": "Mods & APK",
+      "sous_categorie": "Site-Web",
+      "jeu": "Tout type Jeux",
+      "explication": "An1.com est une plateforme en ligne populaire et ancienne (domaine créé en 1998) spécialisée dans la distribution de jeux et d'applications Android, notamment des versions MOD (modifiées) offrant des fonctionnalités débloquées ou des ressources illimitées.",
+      "wiki": "https://search.brave.com/go/v1#AYKaGfNTQYgBawfbwAHBm7BAa4C0hliedXDIf8eLgKfMLP159eYBh8z9xTsngJaeTX-uBp8MIj9oOGlzmY732VO_Tu1fbxLchxR4DqCsBZc2YP0IUoata9wLtm2ePjhZcrgo175U7Sk8bfUTFVKppGCB4lzM0pXz8mSMbJDNuDa_cpJhqIWovZlrzbVeNY6wnZrBk7BKS8_vFQZ88cfJARk1bGAL",
+      "tags": [
+        "Mods & APK",
+        "Site-Web",
+        "Tout type Jeux",
+        "Apk",
+        "tools"
+      ],
+      "publication": {
+        "titre": "Jeux Recomp (PC, Android, IOS,Linux..)",
+        "type": "Apk",
+        "lien": "https://an1.com/",
+        "date_ajout": "2026-11-26"
+      }
+    },
+    {
       "id": "jeux-recomp-pc-android-ios-linux--1860",
       "categorie": "Pirate",
       "sous_categorie": "",
